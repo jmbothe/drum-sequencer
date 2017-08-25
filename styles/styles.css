@@ -1,11 +1,12 @@
 * {
   box-sizing: border-box;
-  box-shadow: -1px 1px black;
   margin: 0;
+  font-family: nova mono;
 }
 
 body, section, header, div {
   display: flex;
+  background-color: hsl(65, 50%, 98%);
 }
 
 body {
@@ -19,7 +20,12 @@ body {
 }
 
 .main-control-bar > section {
-  flex: 33.333%;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  margin: 2px;
+  border-radius: 6px;
+  box-shadow: 1px 1px 1px hsl(55, 30%, 50%);
 }
 
 .drums-bar {
@@ -28,7 +34,14 @@ body {
 }
 
 .drum {
-  flex: 12.5%;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  margin: 2px;
+  border-radius: 6px;
+  box-shadow: 1px 1px 1px hsl(55, 30%, 50%);
+  background-color: hsl(55, 30%, 92%);
+  font-size: .75em;
 }
 
 .sequence-grid {
@@ -37,12 +50,20 @@ body {
 }
 
 .sequence-row {
-  flex: 12.5%;
+  flex: 1;
 }
 
 .sequence-block {
-  flex: 6.25%;
+  flex: 1;
+  margin: 2px;
+  border-radius: 6px;
+  box-shadow: 1px 1px 1px hsl(55, 30%, 50%);
 }
+
+.grey {
+  background-color: hsl(55, 30%, 92%);
+}
+
 
 @media only screen and (orientation: portrait) {
   body {
@@ -55,18 +76,10 @@ body {
     width: 100%;
   }
 
-  .main-control-bar > section {
-    height: 100%;
-  }
-
   .drums-bar {
     flex-direction: row;
     height: 10%;
     width: 100%;
-  }
-
-  .drum {
-    height: 100%;
   }
 
   .sequence-grid {
@@ -78,9 +91,5 @@ body {
   .sequence-row {
     flex-direction: column;
     height: 100%;
-  }
-
-  .sequence-block {
-    width: 100%;
   }
 }
