@@ -2,9 +2,48 @@
 <script src="../main.js"></script>
 <script>
 
-tests({
-  '': function() {
+/*
 
+MODEL
+  should have access to drum sounds
+  should play drum sounds
+  should have drum kits
+  should have a way of telling BPM
+  should have a way of changing BPM live (while sequencing)
+  should have a way of sequenceing through drum beats in rhythm
+
+PLAY BUTTON
+  should toggle text content between "play" and "pause"
+  should toggle color depending on mode
+  should animate when clicked
+  should toggle the playing of the sequence
+
+KIT BUTTON
+  should cycle text through kit options
+  should animate when clicked
+  should trgger change of drum selections for each drum column
+
+BPM BUTTON
+  should be draggable
+  should increase BPM when dragged up
+  should decrease BPM when dragged down
+  should change color while being dragged
+  should see BPM number shanging while being dragged
+
+DRUM BUTTONS
+  should play the sound of the beat when clicked
+  should animate when clicked
+
+SEQUENCE BLOCKS
+  should toggle drum sound for that column, on that beat
+  if toggled on, should be lit a certain color
+  if toggled on, should flash when sequence passes by
+  if toggled on, should trigger drum sound
+
+*/
+tests({
+  'it should trigger drum sounds': function() {
+    
   }
 });
 
