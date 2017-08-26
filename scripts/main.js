@@ -1,9 +1,9 @@
 'use strict';
 
 jQuery(($) => {
-  var audio_context = new AudioContext();
-
   const model = {
+    audioContext: new AudioContext(),
+
     kits: {
       808: {
         path: 'assets/808/',
@@ -32,10 +32,19 @@ jQuery(($) => {
     },
 
     triggerSound: function playSound(buffer) {
-      const source = audio_context.createBufferSource();
-      source.buffer = buffer;
-      source.connect(audio_context.destination);
-      source.start(0);
+      const reader = new FileReader();
+      reader.onload = function() {
+        var str = this.result;
+        console.log(str);
+        const aud = new Audio(str);
+        aud.play();
+      };
+      reader.readAsDataURL(buffer);
+
+      // const source = this.audioContext.createBufferSource();
+      // source.buffer = buffer;
+      // source.connect(this.audioContext.destination);
+      // source.start(0);
     },
 
     runSequence: function runSequence() {
@@ -74,12 +83,13 @@ jQuery(($) => {
           const audioUrl = `${model.kits[object].path}${item}.wav`;
 
           request.open('GET', audioUrl, true);
-          request.responseType = 'arraybuffer';
+          request.responseType = 'blob';
 
           request.onload = function onload() {
-            audio_context.decodeAudioData(request.response, (buffer) => {
-              model.kits[object].buffers[model.kits[object].files.indexOf(item)] = buffer;
-            });
+            model.kits[object].buffers[model.kits[object].files.indexOf(item)] = request.response;
+            // model.audioContext.decodeAudioData(request.response, (buffer) => {
+            //   model.kits[object].buffers[model.kits[object].files.indexOf(item)] = buffer;
+            // });
           };
           request.send();
         });
