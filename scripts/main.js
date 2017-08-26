@@ -37,7 +37,13 @@ jQuery(($) => {
         var str = this.result;
         console.log(str);
         const aud = new Audio(str);
-        aud.play();
+        let playPromise = aud.play();
+        if (playPromise !== undefined) {
+          playPromise.then(function() {
+          }).catch(function(error) {
+            alert('audio issues', error)
+          });
+        }
       };
       reader.readAsDataURL(buffer);
 
