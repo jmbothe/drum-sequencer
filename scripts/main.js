@@ -2,7 +2,7 @@
 
 jQuery(($) => {
   const model = {
-    audioContext: new AudioContext(),
+    // audioContext: new AudioContext(),
 
     kits: {
       808: {
@@ -67,7 +67,7 @@ jQuery(($) => {
 
   const controller = {
     initialize: function initialize() {
-      window.AudioContext = window.AudioContext || window.webkitAudioContext;
+      // window.AudioContext = window.AudioContext || window.webkitAudioContext;
       this.loadSounds();
       this.setupKit();
       this.kitClickListener();
