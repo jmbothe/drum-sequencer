@@ -42,7 +42,7 @@ body {
   width: 100%;
 }
 
-.sequence-block, .drum, .main-control-bar > section {
+.sequence-cell, .drum, .main-control-bar > section {
   flex: 1;
   margin: 0 3px 3px 0;
   border-radius: 6px;
@@ -73,7 +73,7 @@ body {
   color: #444;
 }
 
-.active-block {
+.active-cell {
   background-color: hsl(45, 80%, 55%);
 }
 

@@ -2,17 +2,19 @@
 
 jQuery(($) => {
   const model = {
-    // audioContext: new AudioContext(),
+    sequenceGrid: {
+      height: 16,
+      width: 8,
+      activeCells: [],
+    },
 
     kits: {
       808: {
-        path: 'assets/808/',
         files: ['clap', 'crash', 'hat', 'kick', 'snare', 'tom', 'bell', 'click'],
         buffers: [],
       },
 
       electro: {
-        path: 'assets/electro/',
         files: ['clap', 'crash', 'hat', 'kick', 'snare', 'tom', 'laser', 'shake'],
         buffers: [],
       },
@@ -22,21 +24,38 @@ jQuery(($) => {
 
     play: false,
 
+    bpm: (60 / 100) * 1000,
+
+    setBpm: function setBpm(number) {
+      this.bpm = (60 / number) * 1000
+    },
+
     togglePlay: function togglePlay() {
-      this.play = this.play === false;
-      model.runSequence();
+      if (this.play) {
+        this.play = false;
+      } else {
+        this.play = true;
+        model.runSequence();
+      }
     },
 
     toggleActiveKit: function toggleActiveKit() {
       this.activeKit = this.activeKit === '808' ? 'electro' : '808';
     },
 
+    toggleActiveCell: function toggleActiveCell(cell) {
+      const cellIndex = this.sequenceGrid.activeCells.indexOf(cell)
+      if (cellIndex !== -1) {
+        this.sequenceGrid.activeCells.splice(cellIndex, 1)
+      } else {
+        this.sequenceGrid.activeCells.push(cell)
+      }
+    },
+
     triggerSound: function playSound(buffer) {
       const reader = new FileReader();
       reader.onload = function() {
-        var str = this.result;
-        console.log(str);
-        const aud = new Audio(str);
+        const aud = new Audio(this.result);
         let playPromise = aud.play();
         if (playPromise !== undefined) {
           playPromise.then(function() {
@@ -46,88 +65,114 @@ jQuery(($) => {
         }
       };
       reader.readAsDataURL(buffer);
-
-      // const source = this.audioContext.createBufferSource();
-      // source.buffer = buffer;
-      // source.connect(this.audioContext.destination);
-      // source.start(0);
     },
 
     runSequence: function runSequence() {
-      for (let i = 1; i < 65; i++) {
-        const step = i % 16;
-        setTimeout(() => {
-          $('.sequence-row').each(function iterate(index) {
-            if ($(`:nth-child(${step})`, this).hasClass('active-block')) {
-              model.triggerSound(model.kits[model.activeKit].buffers[index]);
-            }
-          });
-        }, i * 200);
-      }
+      let row = 0;
+      const height = model.sequenceGrid.height;
+      const width = model.sequenceGrid.width;
+      (function recurse () {
+        for (let column = 0; column < width; column++) {
+          let cellIsActive = model.sequenceGrid.activeCells.includes(((row % height) * height) + column);
+          if (cellIsActive) {
+            model.triggerSound(model.kits[model.activeKit].buffers[column]);
+          }
+        }
+        if (model.play) {
+          row++;
+          setTimeout(recurse, model.bpm);
+        }
+      })();
     },
+
+    // runSequence: function runSequence() {
+    //   let row = 0;
+    //   const height = model.sequenceGrid.height
+    //   const width = model.sequenceGrid.width
+    //   let cycle = setInterval(function () {
+    //     for (let column = 0; column < width; column++) {
+    //       let cellIsActive = model.sequenceGrid.activeCells.includes(((row % height) * height) + column);
+    //       if (cellIsActive) {
+    //         model.triggerSound(model.kits[model.activeKit].buffers[column]);
+    //       }
+    //     }
+    //     !model.play ? clearInterval(cycle) : row++;
+    //   }, model.bpm);
+    // },
   };
 
   const view = {
-
-  };
-
-  const controller = {
-    initialize: function initialize() {
-      // window.AudioContext = window.AudioContext || window.webkitAudioContext;
-      this.loadSounds();
-      this.setupKit();
-      this.kitClickListener();
-      this.drumClickListener();
-      this.sequenceBlockClickListener();
-      this.playClickListener();
-    },
-
-    loadSounds: function loadSounds() {
-      Object.keys(model.kits).forEach((object) => {
-        model.kits[object].files.forEach((item, index) => {
-          const request = new XMLHttpRequest();
-          const audioUrl = `${model.kits[object].path}${item}.wav`;
-
-          request.open('GET', audioUrl, true);
-          request.responseType = 'blob';
-
-          request.onload = function onload() {
-            model.kits[object].buffers[model.kits[object].files.indexOf(item)] = request.response;
-            // model.audioContext.decodeAudioData(request.response, (buffer) => {
-            //   model.kits[object].buffers[model.kits[object].files.indexOf(item)] = buffer;
-            // });
-          };
-          request.send();
-        });
-      });
-    },
-
-    setupKit: function setupKit() {
-      model.toggleActiveKit();
+    toggleActiveKit: function toggleActiveKit() {
       $('.kit').text(`${model.activeKit} kit`);
       $('.drum').text(index =>
         model.kits[model.activeKit].files[index],
       );
     },
 
-    toggleActiveSequenceBlock: function toggleActiveSequenceBlock(e) {
-      $(e.target).toggleClass('active-block');
+    toggleActiveCell: function toggleActiveCell(e) {
+      $(e.target).toggleClass('active-cell');
     },
 
-    playClickListener: function playClickListener() {
-      $('.play').on('click', model.togglePlay.bind(model));
+    togglePlay: function togglePlay(e) {
+      let newText = $('.play').text() === 'play' ? 'pause' : 'play';
+      $('.play').text(newText);
+    }
+  };
+
+  const controller = {
+    initialize: function initialize() {
+      this.setupListeners();
+      this.loadSounds();
+      this.toggleActiveKit();
     },
 
-    kitClickListener: function kitClickListener() {
+    setupListeners: function setupListeners() {
+      $('.play').on('click', this.togglePlay);
       $('.kit').on('click', this.setupKit);
+      $('.sequence-cell').on('click', this.toggleActiveCell);
+      $('.bpm').on('change', this.setBpm);
     },
 
-    sequenceBlockClickListener: function sequenceBLockClickListener() {
-      $('.sequence-block').on('click', this.toggleActiveSequenceBlock);
+    loadSounds: function loadSounds() {
+      Object.keys(model.kits).forEach((kit) => {
+        model.kits[kit].files.forEach((item) => {
+          const request = new XMLHttpRequest();
+          const audioUrl = `/assets/${kit}/${item}.mp3`;
+
+          request.open('GET', audioUrl, true);
+          request.responseType = 'blob';
+
+          request.onload = function onload() {
+            const buffers = model.kits[kit].buffers;
+            const index = model.kits[kit].files.indexOf(item);
+            buffers[index] = request.response;
+          };
+          request.send();
+        });
+      });
     },
 
-    drumClickListener: function drumClickListener() {
-      $('.drums-bar').on('click', this.triggerSound);
+    toggleActiveKit: function toggleActiveKit() {
+      model.toggleActiveKit();
+      view.toggleActiveKit();
+    },
+
+    toggleActiveCell: function toggleCell(e) {
+      const column = $(e.target.parentElement).index();
+      const row = $(e.target).index();
+      const gridHeight = model.sequenceGrid.height;
+
+      model.toggleActiveCell((row * gridHeight) + column);
+      view.toggleActiveCell(e);
+    },
+
+    togglePlay: function togglePlay(e) {
+      model.togglePlay();
+      view.togglePlay(e);
+    },
+    setBpm: function setBpm() {
+      let bpm = $('#bpm-input').val()
+      model.setBpm(bpm);
     },
   };
 
