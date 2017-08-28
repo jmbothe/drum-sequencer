@@ -110,10 +110,7 @@ jQuery(($) => {
     },
 
     getPlayPermission: function getPlayPermission() {
-      const source = model.audioContext.createBufferSource();
-      source.buffer = model.kits[model.activeKit].buffers[0];
-      source.connect(model.audioContext.destination);
-      source.start(0);
+      model.triggerSound(model.kits[model.activeKit].buffers[1]);
     },
 
     loadSounds: function loadSounds() {
