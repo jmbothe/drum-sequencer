@@ -111,7 +111,7 @@ jQuery(($) => {
 
     getPlayPermission: function getPlayPermission() {
       const source = model.audioContext.createBufferSource();
-      const gainNode = context.createGain();
+      const gainNode = model.audioContext.createGain();
       source.buffer = model.kits[model.activeKit].buffers[0];
       source.connect(gainNode);
       gainNode.connect(model.audioContext.destination);
