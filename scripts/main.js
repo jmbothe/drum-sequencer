@@ -115,7 +115,7 @@ jQuery(($) => {
       source.buffer = model.kits[model.activeKit].buffers[0];
       source.connect(gainNode);
       gainNode.connect(model.audioContext.destination);
-      gainNode.gain.value = 0.5;
+      gainNode.gain.value = 0;
       source.start(0);
     },
 
