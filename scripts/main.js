@@ -19,18 +19,11 @@ jQuery(($) => {
     },
 
     kits: {
-      808: {
-        files: ['clap', 'crash', 'hat', 'kick', 'snare', 'tom', 'bell', 'click'],
-        buffers: [],
-      },
-
-      electro: {
-        files: ['clap', 'crash', 'hat', 'kick', 'snare', 'tom', 'laser', 'shake'],
-        buffers: [],
-      },
+      808: {},
+      natural: {},
     },
 
-    activeKit: 'electro',
+    activeKit: 'natural',
 
     play: false,
 
@@ -45,7 +38,7 @@ jQuery(($) => {
     },
 
     toggleActiveKit: function toggleActiveKit() {
-      this.activeKit = this.activeKit === '808' ? 'electro' : '808';
+      this.activeKit = this.activeKit === '808' ? 'natural' : '808';
     },
 
     toggleActiveCell: function toggleActiveCell(cell) {
@@ -68,9 +61,6 @@ jQuery(($) => {
   const view = {
     toggleActiveKit: function toggleActiveKit() {
       $('.kit').text(`${model.activeKit} kit`);
-      $('.drum').text(index =>
-        model.kits[model.activeKit].files[index],
-      );
     },
 
     toggleActiveCell: function toggleActiveCell(e) {
@@ -112,7 +102,7 @@ jQuery(($) => {
     getPlayPermission: function getPlayPermission() {
       const source = model.audioContext.createBufferSource();
       const gainNode = model.audioContext.createGain();
-      source.buffer = model.kits[model.activeKit].buffers[0];
+      source.buffer = model.kits[model.activeKit][0];
       source.connect(gainNode);
       gainNode.connect(model.audioContext.destination);
       gainNode.gain.value = 0;
@@ -120,10 +110,11 @@ jQuery(($) => {
     },
 
     loadSounds: function loadSounds() {
+      const drums = ['hat', 'kick', 'snare', 'tom', 'crash', 'perc1', 'perc2', 'perc3']
       Object.keys(model.kits).forEach((kit) => {
-        model.kits[kit].files.forEach((item) => {
+        drums.forEach((drum, index) => {
           const request = new XMLHttpRequest();
-          // const audioUrl = `/assets/${kit}/${item}.mp3`;
+          // const audioUrl = `/assets/${kit}/${drum}.mp3`;
           const audioUrl = `/drum-sequencer/assets/${kit}/${item}.mp3`;
 
           request.open('GET', audioUrl);
@@ -131,9 +122,7 @@ jQuery(($) => {
 
           request.onload = function onload() {
             model.audioContext.decodeAudioData(request.response, (buffer) => {
-              const buffers = model.kits[kit].buffers;
-              const index = model.kits[kit].files.indexOf(item);
-              buffers[index] = buffer;
+              model.kits[kit][index] = buffer;
             });
           };
           request.send();
@@ -150,12 +139,12 @@ jQuery(($) => {
       ((function recursive() {
         if (model.play) {
           for (let column = 0; column < width; column++) {
-            const cell = ((row % height) * height) + column;
+            const currentCell = ((row % height) * height) + column;
 
-            if (activeCells.includes(cell)) {
+            if (activeCells.includes(currentCell)) {
               const parent = `.sequence-column:nth-child(${column + 1})`;
               const child = `.sequence-cell:nth-child(${(row % height) + 1})`;
-              const buffer = model.kits[model.activeKit].buffers[column];
+              const buffer = model.kits[model.activeKit][column];
 
               model.triggerSound(buffer);
               view.animateActiveCell(`${parent} > ${child}`);
