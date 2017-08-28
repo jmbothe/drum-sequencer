@@ -1,6 +1,17 @@
 'use strict';
+
 jQuery(($) => {
   const model = {
+    audioContext: ((function initAudioContext() {
+      try {
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+        return new AudioContext();
+      } catch (e) {
+        alert('Web Audio API is not supported in this browser');
+        return undefined;
+      }
+    })()),
+
     sequenceGrid: {
       height: 16,
       width: 8,
@@ -47,17 +58,10 @@ jQuery(($) => {
     },
 
     triggerSound: function playSound(buffer) {
-      const reader = new FileReader();
-      reader.onload = function load() {
-        const aud = new Audio(this.result);
-        const playPromise = aud.play();
-        if (playPromise !== undefined) {
-          playPromise.catch((error) => {
-            alert('audio issues', error);
-          });
-        }
-      };
-      reader.readAsDataURL(buffer);
+      const source = model.audioContext.createBufferSource();
+      source.buffer = buffer;
+      source.connect(model.audioContext.destination);
+      source.start(0);
     },
   };
 
@@ -102,22 +106,25 @@ jQuery(($) => {
       $('.kit').on('click', this.toggleActiveKit);
       $('.sequence-cell').on('click', this.toggleActiveCell);
       $('#bpm-input').on('input', this.setBpm);
-      $('#bpm-input').inputDrag({ min: 1, max: 400 });
+      $('#bpm-input').inputDrag({ min: 1, max: 600 });
     },
 
     loadSounds: function loadSounds() {
       Object.keys(model.kits).forEach((kit) => {
         model.kits[kit].files.forEach((item) => {
           const request = new XMLHttpRequest();
-          const audioUrl = `/drum-sequencer/assets/${kit}/${item}.mp3`;
+          const audioUrl = `/assets/${kit}/${item}.mp3`;
+          // const audioUrl = `/drum-sequencer/assets/${kit}/${item}.mp3`;
 
           request.open('GET', audioUrl);
-          request.responseType = 'blob';
+          request.responseType = 'arraybuffer';
 
           request.onload = function onload() {
-            const buffers = model.kits[kit].buffers;
-            const index = model.kits[kit].files.indexOf(item);
-            buffers[index] = request.response;
+            model.audioContext.decodeAudioData(request.response, (buffer) => {
+              const buffers = model.kits[kit].buffers;
+              const index = model.kits[kit].files.indexOf(item);
+              buffers[index] = buffer;
+            });
           };
           request.send();
         });
