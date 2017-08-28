@@ -57,7 +57,7 @@ jQuery(($) => {
       }
     },
 
-    triggerSound: function playSound(buffer) {
+    triggerSound: function triggerSound(buffer) {
       const source = model.audioContext.createBufferSource();
       source.buffer = buffer;
       source.connect(model.audioContext.destination);
@@ -95,18 +95,25 @@ jQuery(($) => {
 
   const controller = {
     initialize: function initialize() {
-      this.setupListeners();
       this.loadSounds();
+      this.setupListeners();
       this.toggleActiveKit();
       this.setBpm();
     },
 
     setupListeners: function setupListeners() {
-      $('.play').on('click', this.togglePlay.bind(this));
+      $('.play').on('click', this.dummyPlay).on('click', this.togglePlay.bind(this));
       $('.kit').on('click', this.toggleActiveKit);
       $('.sequence-cell').on('click', this.toggleActiveCell);
       $('#bpm-input').on('input', this.setBpm);
       $('#bpm-input').inputDrag({ min: 1, max: 600 });
+    },
+
+    dummyPlay: function dummyPlay() {
+      const source = model.audioContext.createBufferSource();
+      source.buffer = model.kits[model.activeKit].buffers[0];
+      source.connect(model.audioContext.destination);
+      source.start(0);
     },
 
     loadSounds: function loadSounds() {
