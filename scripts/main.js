@@ -120,8 +120,8 @@ jQuery(($) => {
       Object.keys(model.kits).forEach((kit) => {
         model.kits[kit].files.forEach((item) => {
           const request = new XMLHttpRequest();
-          const audioUrl = `/assets/${kit}/${item}.mp3`;
-          // const audioUrl = `/drum-sequencer/assets/${kit}/${item}.mp3`;
+          // const audioUrl = `/assets/${kit}/${item}.mp3`;
+          const audioUrl = `/drum-sequencer/assets/${kit}/${item}.mp3`;
 
           request.open('GET', audioUrl);
           request.responseType = 'arraybuffer';
