@@ -102,14 +102,14 @@ jQuery(($) => {
     },
 
     setupListeners: function setupListeners() {
-      $('.play').on('click', this.dummyPlay).on('click', this.togglePlay.bind(this));
+      $('.play').one('click', this.getPlayPermission).on('click', this.togglePlay.bind(this));
       $('.kit').on('click', this.toggleActiveKit);
       $('.sequence-cell').on('click', this.toggleActiveCell);
       $('#bpm-input').on('input', this.setBpm);
       $('#bpm-input').inputDrag({ min: 1, max: 600 });
     },
 
-    dummyPlay: function dummyPlay() {
+    getPlayPermission: function getPlayPermission() {
       const source = model.audioContext.createBufferSource();
       source.buffer = model.kits[model.activeKit].buffers[0];
       source.connect(model.audioContext.destination);
