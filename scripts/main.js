@@ -1,5 +1,4 @@
 'use strict';
-
 jQuery(($) => {
   const model = {
     sequenceGrid: {
@@ -24,19 +23,14 @@ jQuery(($) => {
 
     play: false,
 
-    bpm: (60 / 100) * 1000,
+    bpm: undefined,
 
     setBpm: function setBpm(number) {
-      this.bpm = (60 / number) * 1000
+      this.bpm = (60 / number) * 1000;
     },
 
     togglePlay: function togglePlay() {
-      if (this.play) {
-        this.play = false;
-      } else {
-        this.play = true;
-        model.runSequence();
-      }
+      this.play = this.play === false;
     },
 
     toggleActiveKit: function toggleActiveKit() {
@@ -44,61 +38,27 @@ jQuery(($) => {
     },
 
     toggleActiveCell: function toggleActiveCell(cell) {
-      const cellIndex = this.sequenceGrid.activeCells.indexOf(cell)
+      const cellIndex = this.sequenceGrid.activeCells.indexOf(cell);
       if (cellIndex !== -1) {
-        this.sequenceGrid.activeCells.splice(cellIndex, 1)
+        this.sequenceGrid.activeCells.splice(cellIndex, 1);
       } else {
-        this.sequenceGrid.activeCells.push(cell)
+        this.sequenceGrid.activeCells.push(cell);
       }
     },
 
     triggerSound: function playSound(buffer) {
       const reader = new FileReader();
-      reader.onload = function() {
+      reader.onload = function load() {
         const aud = new Audio(this.result);
-        let playPromise = aud.play();
+        const playPromise = aud.play();
         if (playPromise !== undefined) {
-          playPromise.then(function() {
-          }).catch(function(error) {
-            alert('audio issues', error)
+          playPromise.catch((error) => {
+            alert('audio issues', error);
           });
         }
       };
       reader.readAsDataURL(buffer);
     },
-
-    runSequence: function runSequence() {
-      let row = 0;
-      const height = model.sequenceGrid.height;
-      const width = model.sequenceGrid.width;
-      (function recurse () {
-        for (let column = 0; column < width; column++) {
-          let cellIsActive = model.sequenceGrid.activeCells.includes(((row % height) * height) + column);
-          if (cellIsActive) {
-            model.triggerSound(model.kits[model.activeKit].buffers[column]);
-          }
-        }
-        if (model.play) {
-          row++;
-          setTimeout(recurse, model.bpm);
-        }
-      })();
-    },
-
-    // runSequence: function runSequence() {
-    //   let row = 0;
-    //   const height = model.sequenceGrid.height
-    //   const width = model.sequenceGrid.width
-    //   let cycle = setInterval(function () {
-    //     for (let column = 0; column < width; column++) {
-    //       let cellIsActive = model.sequenceGrid.activeCells.includes(((row % height) * height) + column);
-    //       if (cellIsActive) {
-    //         model.triggerSound(model.kits[model.activeKit].buffers[column]);
-    //       }
-    //     }
-    //     !model.play ? clearInterval(cycle) : row++;
-    //   }, model.bpm);
-    // },
   };
 
   const view = {
@@ -113,10 +73,20 @@ jQuery(($) => {
       $(e.target).toggleClass('active-cell');
     },
 
-    togglePlay: function togglePlay(e) {
-      let newText = $('.play').text() === 'play' ? 'pause' : 'play';
+    togglePlay: function togglePlay() {
+      const newText = $('.play').text() === 'play' ? 'pause' : 'play';
       $('.play').text(newText);
-    }
+    },
+
+    animateActiveCell: function animateActiveCell(cell) {
+      $(cell).animate({
+        opacity: 0.5,
+      }, 50, function endAnimation() {
+        $(this).animate({
+          opacity: 1,
+        }, 50);
+      });
+    },
   };
 
   const controller = {
@@ -124,13 +94,15 @@ jQuery(($) => {
       this.setupListeners();
       this.loadSounds();
       this.toggleActiveKit();
+      this.setBpm();
     },
 
     setupListeners: function setupListeners() {
-      $('.play').on('click', this.togglePlay);
-      $('.kit').on('click', this.setupKit);
+      $('.play').on('click', this.togglePlay.bind(this));
+      $('.kit').on('click', this.toggleActiveKit);
       $('.sequence-cell').on('click', this.toggleActiveCell);
-      $('.bpm').on('change', this.setBpm);
+      $('#bpm-input').on('input', this.setBpm);
+      $('#bpm-input').inputDrag({ min: 1, max: 400 });
     },
 
     loadSounds: function loadSounds() {
@@ -152,6 +124,32 @@ jQuery(($) => {
       });
     },
 
+    runSequence: function runSequence() {
+      let row = 0;
+      const height = model.sequenceGrid.height;
+      const width = model.sequenceGrid.width;
+      const activeCells = model.sequenceGrid.activeCells;
+
+      ((function recursive() {
+        if (model.play) {
+          for (let column = 0; column < width; column++) {
+            const cell = ((row % height) * height) + column;
+
+            if (activeCells.includes(cell)) {
+              const parent = `.sequence-column:nth-child(${column + 1})`;
+              const child = `.sequence-cell:nth-child(${(row % height) + 1})`;
+              const buffer = model.kits[model.activeKit].buffers[column];
+
+              model.triggerSound(buffer);
+              view.animateActiveCell(`${parent} > ${child}`);
+            }
+          }
+          row++;
+          setTimeout(recursive, model.bpm);
+        }
+      })());
+    },
+
     toggleActiveKit: function toggleActiveKit() {
       model.toggleActiveKit();
       view.toggleActiveKit();
@@ -168,11 +166,12 @@ jQuery(($) => {
 
     togglePlay: function togglePlay(e) {
       model.togglePlay();
+      this.runSequence();
       view.togglePlay(e);
     },
+
     setBpm: function setBpm() {
-      let bpm = $('#bpm-input').val()
-      model.setBpm(bpm);
+      model.setBpm($('#bpm-input').val());
     },
   };
 

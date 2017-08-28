@@ -26,6 +26,25 @@ body {
   width: 100%;
 }
 
+.bpm {
+  flex-wrap: wrap;
+  align-content: center;
+}
+#bpm-input {
+  width: 50%;
+  border: 0;
+  outline: none;
+  font-size: .8rem;
+  text-align: center;
+  background-color: transparent;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 .drums-bar {
   height: 10%;
   width: 100%;
@@ -36,7 +55,7 @@ body {
   width: 100%;
 }
 
-.sequence-row {
+.sequence-column {
   flex-direction: column;
   flex: 1;
   width: 100%;
@@ -77,6 +96,10 @@ body {
   background-color: hsl(45, 80%, 55%);
 }
 
+.in-sequence {
+  opacity: 0.5;
+}
+
 @media only screen and (orientation: landscape) {
 
   body {
@@ -101,20 +124,21 @@ body {
     width: 80%;
   }
 
-  .sequence-row {
+  .sequence-column {
     flex-direction: row;
     height: 100%;
-  }
-
-  .play, .bpm {
-    font-size: .4rem;
   }
 
   .kit {
     font-size: .25rem;
   }
 
-  .drum {
+  .bpm, .play, .drum {
     font-size: .3rem;
+  }
+
+  #bpm-input {
+    font-size: .3rem;
+    width: 100%;
   }
 }
