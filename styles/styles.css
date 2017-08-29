@@ -34,7 +34,7 @@ body {
   width: 60%;
   border: 0;
   outline: none;
-  font-size: .8rem;
+  font-size: .6rem;
   text-align: center;
   background-color: transparent;
 }
@@ -42,11 +42,13 @@ body {
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
   -webkit-appearance: none;
+  appearance: none;
   margin: 0;
 }
 
 .bpm-text {
   width: 40%;
+  font-size: .6rem;
 }
 
 .drums-bar {
@@ -72,7 +74,7 @@ input[type=number]::-webkit-outer-spin-button {
   box-shadow: 1px 1px 2px #999;
 }
 
-.play, .kit, .bpm {
+.play, .kit, .bpm, .clear {
   align-items: center;
   justify-content: center;
   font-size: .8rem;
@@ -98,10 +100,6 @@ input[type=number]::-webkit-outer-spin-button {
 
 .active-cell {
   background-color: hsl(45, 80%, 55%);
-}
-
-.in-sequence {
-  opacity: 0.5;
 }
 
 @media only screen and (orientation: landscape) {
@@ -137,7 +135,7 @@ input[type=number]::-webkit-outer-spin-button {
     font-size: .25rem;
   }
 
-  .bpm, .play, .drum {
+  .bpm, .play, .drum, .clear {
     font-size: .3rem;
   }
 
@@ -148,5 +146,9 @@ input[type=number]::-webkit-outer-spin-button {
   .bpm-input {
     font-size: .3rem;
     width: 100%;
+  }
+
+  .bpm-text {
+    font-size: .3rem;
   }
 }
