@@ -27,11 +27,11 @@ body {
 }
 
 .bpm {
-  flex-wrap: wrap;
   align-content: center;
 }
-#bpm-input {
-  width: 50%;
+
+.bpm-input {
+  width: 60%;
   border: 0;
   outline: none;
   font-size: .8rem;
@@ -43,6 +43,10 @@ input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+.bpm-text {
+  width: 40%;
 }
 
 .drums-bar {
@@ -137,7 +141,11 @@ input[type=number]::-webkit-outer-spin-button {
     font-size: .3rem;
   }
 
-  #bpm-input {
+  .bpm {
+    flex-wrap: wrap;
+  }
+
+  .bpm-input {
     font-size: .3rem;
     width: 100%;
   }

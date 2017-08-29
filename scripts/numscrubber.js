@@ -9,19 +9,19 @@
 			el = $(this),
 			_xStart = 0;
 
-		el.mousedown(function(e) {
+		el.vmousedown(function(e) {
 			isDown = 1;
 			e.preventDefault()
 			var _x = event.clientX - el.val();
 			_xStart = _x;
 		});
-		el.click(function() {
+		el.vclick(function() {
 			el.focus();
 		});
-		$(document).mouseup(function(e) {
+		$(document).vmouseup(function(e) {
 			isDown = 0;
 		});
-		$(document).mousemove(function(e) {
+		$(document).vmousemove(function(e) {
 			if(!isDown) {
 				return;
 			}

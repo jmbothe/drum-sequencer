@@ -9,8 +9,10 @@
   <link href="https://fonts.googleapis.com/css?family=Nova+Mono" rel="stylesheet">
   <link rel="stylesheet" href="styles/normalize.css">
   <link rel="stylesheet" href="styles/styles.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-  <script src="scripts/numscrubber.js"></script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js" defer></script>
+  <script src="scripts/jquery.mobile.js" defer></script>
+  <script src="scripts/numscrubber.js" defer></script>
   <script src="scripts/main.js" defer></script>
 </head>
 
@@ -18,18 +20,21 @@
   <header class="main-control-bar">
     <section class="play">play</section>
     <section class="kit"></section>
-    <section class="bpm"><span>bpm</span><input id="bpm-input" type="number" value="200"></section>
+    <section class="bpm">
+      <span class="bpm-text">bpm</span>
+      <input class="bpm-input" type="number" value="200">
+    </section>
   </header>
 
   <section class="drums-bar">
-    <div id="drum1" class="drum">hat</div>
-    <div id="drum2" class="drum">kick</div>
-    <div id="drum3" class="drum">snare</div>
-    <div id="drum4" class="drum">tom</div>
-    <div id="drum5" class="drum">crash</div>
-    <div id="drum6" class="drum">perc1</div>
-    <div id="drum7" class="drum">perc2</div>
-    <div id="drum8" class="drum">perc3</div>
+    <div class="drum">hat</div>
+    <div class="drum">kick</div>
+    <div class="drum">snare</div>
+    <div class="drum">tom</div>
+    <div class="drum">crash</div>
+    <div class="drum">perc1</div>
+    <div class="drum">perc2</div>
+    <div class="drum">perc3</div>
   </section>
 
   <section class="sequence-grid">

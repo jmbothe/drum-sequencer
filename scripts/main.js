@@ -21,9 +21,10 @@ jQuery(($) => {
     kits: {
       808: {},
       natural: {},
+      noise: {},
     },
 
-    activeKit: 'natural',
+    activeKit: 'noise',
 
     play: false,
 
@@ -38,7 +39,9 @@ jQuery(($) => {
     },
 
     toggleActiveKit: function toggleActiveKit() {
-      this.activeKit = this.activeKit === '808' ? 'natural' : '808';
+      const kits = Object.keys(this.kits);
+      const nextKit = (kits.indexOf(this.activeKit) + 1) % kits.length;
+      this.activeKit = kits[nextKit];
     },
 
     toggleActiveCell: function toggleActiveCell(cell) {
@@ -95,8 +98,7 @@ jQuery(($) => {
       $('.play').one('click', this.getPlayPermission).on('click', this.togglePlay.bind(this));
       $('.kit').on('click', this.toggleActiveKit);
       $('.sequence-cell').on('click', this.toggleActiveCell);
-      $('#bpm-input').on('input', this.setBpm);
-      $('#bpm-input').inputDrag({ min: 1, max: 600 });
+      $('.bpm-input').on('input', this.setBpm).inputDrag({ min: 1, max: 600 });
     },
 
     getPlayPermission: function getPlayPermission() {
@@ -177,7 +179,7 @@ jQuery(($) => {
     },
 
     setBpm: function setBpm() {
-      model.setBpm($('#bpm-input').val());
+      model.setBpm($('.bpm-input').val());
     },
   };
 
