@@ -115,7 +115,7 @@ jQuery(($) => {
         drums.forEach((drum, index) => {
           const request = new XMLHttpRequest();
           // const audioUrl = `/assets/${kit}/${drum}.mp3`;
-          const audioUrl = `/drum-sequencer/assets/${kit}/${item}.mp3`;
+          const audioUrl = `/drum-sequencer/assets/${kit}/${drum}.mp3`;
 
           request.open('GET', audioUrl);
           request.responseType = 'arraybuffer';
