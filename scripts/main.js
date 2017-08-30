@@ -2,25 +2,15 @@
 
 jQuery(($) => {
   const model = {
-    audioContext: ((function initAudioContext() {
-      try {
-        window.AudioContext = window.AudioContext || window.webkitAudioContext;
-        return new AudioContext();
-      } catch (e) {
-        alert('Web Audio API is not supported in this browser');
-        return e;
-      }
-    })()),
-
-    sequenceGrid: {
-      height: 16,
-      width: 8,
+    grid: {
+      height: $('.sequence-column').first().children().length,
+      width: $('.sequence-grid').children().length,
       activeCells: [],
     },
 
     kits: {
-      808: {},
-      natural: {},
+      '808 kit': {},
+      acoustic: {},
       noise: {},
     },
 
@@ -28,10 +18,10 @@ jQuery(($) => {
 
     play: false,
 
-    bpm: undefined,
+    beatLength: undefined,
 
-    setBpm: function setBpm(number) {
-      this.bpm = (60 / number) * 1000;
+    setBeatLength: function setBpm(bpm) {
+      this.beatLength = (15 / bpm) * 1000;
     },
 
     togglePlay: function togglePlay() {
@@ -45,42 +35,52 @@ jQuery(($) => {
     },
 
     toggleActiveCell: function toggleActiveCell(cell) {
-      const cellIndex = this.sequenceGrid.activeCells.indexOf(cell);
+      const cellIndex = this.grid.activeCells.indexOf(cell);
       if (cellIndex !== -1) {
-        this.sequenceGrid.activeCells.splice(cellIndex, 1);
+        this.grid.activeCells.splice(cellIndex, 1);
       } else {
-        this.sequenceGrid.activeCells.push(cell);
+        this.grid.activeCells.push(cell);
       }
     },
 
     clearCells: function clearCells() {
-      this.sequenceGrid.activeCells = [];
+      this.grid.activeCells = [];
     },
 
+    audio: ((function initAudio() {
+      try {
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+        return new AudioContext();
+      } catch (e) {
+        alert('Web Audio API is not supported in this browser');
+        return e;
+      }
+    })()),
+
     triggerSound: function triggerSound(buffer) {
-      const source = model.audioContext.createBufferSource();
+      const source = model.audio.createBufferSource();
       source.buffer = buffer;
-      source.connect(model.audioContext.destination);
+      source.connect(model.audio.destination);
       source.start(0);
+    },
+
+    previewDrum: function previewDrum(drum) {
+      this.triggerSound(drum);
     },
   };
 
   const view = {
+    togglePlay: function togglePlay() {
+      const newText = $('.play').text() === 'play' ? 'pause' : 'play';
+      $('.play').text(newText);
+    },
+
     toggleActiveKit: function toggleActiveKit() {
-      $('.kit').text(`${model.activeKit} kit`);
+      $('.kit').text(`${model.activeKit}`);
     },
 
     toggleActiveCell: function toggleActiveCell(e) {
       $(e.target).toggleClass('active-cell');
-    },
-
-    clearCells: function clearCells() {
-      $('.active-cell').toggleClass('active-cell');
-    },
-
-    togglePlay: function togglePlay() {
-      const newText = $('.play').text() === 'play' ? 'pause' : 'play';
-      $('.play').text(newText);
     },
 
     animateActiveCell: function animateActiveCell(cell) {
@@ -92,12 +92,24 @@ jQuery(($) => {
         }, 50);
       });
     },
+
+    clearCells: function clearCells() {
+      $('.active-cell').toggleClass('active-cell');
+    },
+
+    toggleVisibleMeasure: function toggleVisibleMeasure() {
+      if (window.matchMedia('(orientation: portrait)').matches) {
+        $('.sequence-column').animate({ marginTop: `${$('.sequence-column')[0].style.marginTop === '-80vh' ? 0 : '-80'}vh` });
+      } else if (window.matchMedia('(orientation: landscape)').matches) {
+        $('.sequence-column').animate({ marginLeft: `${$('.sequence-column')[0].style.marginLeft === '-80vw' ? 0 : '-80'}vw` })
+      }
+    }
   };
 
   const controller = {
     initialize: function initialize() {
-      this.loadSounds();
       this.setupListeners();
+      this.loadSounds();
       this.toggleActiveKit();
       this.setBpm();
     },
@@ -106,27 +118,10 @@ jQuery(($) => {
       $('.play').one('click', this.getPlayPermission).on('click', this.togglePlay.bind(this));
       $('.kit').on('click', this.toggleActiveKit);
       $('.sequence-cell').on('click', this.toggleActiveCell);
-      $('.bpm-input').on('input', this.setBpm).inputDrag({ min: 1, max: 600 });
+      $('#bpm-input').on('input', this.setBpm).inputDrag({ min: 30, max: 200 });
       $('.clear').on('click', this.clearCells);
-    },
-
-    clearCells: function clearCells() {
-      model.clearCells();
-      view.clearCells();
-      if (model.play) {
-        model.togglePlay();
-        view.togglePlay();
-      }
-    },
-
-    getPlayPermission: function getPlayPermission() {
-      const source = model.audioContext.createBufferSource();
-      const gainNode = model.audioContext.createGain();
-      source.buffer = model.kits[model.activeKit][0];
-      source.connect(gainNode);
-      gainNode.connect(model.audioContext.destination);
-      gainNode.gain.value = 0;
-      source.start(0);
+      $('.drums-bar').on('click', this.previewDrum);
+      $('.measure').on('click', this.toggleVisibleMeasure)
     },
 
     loadSounds: function loadSounds() {
@@ -141,7 +136,7 @@ jQuery(($) => {
           request.responseType = 'arraybuffer';
 
           request.onload = function onload() {
-            model.audioContext.decodeAudioData(request.response, (buffer) => {
+            model.audio.decodeAudioData(request.response, (buffer) => {
               model.kits[kit][index] = buffer;
             });
           };
@@ -150,10 +145,10 @@ jQuery(($) => {
       });
     },
 
-    runSequence: function runSequence(row = 0) {
-      const height = model.sequenceGrid.height;
-      const width = model.sequenceGrid.width;
-      const activeCells = model.sequenceGrid.activeCells;
+    runSequencer: function runSequencer(row = 0) {
+      const height = model.grid.height;
+      const width = model.grid.width;
+      const activeCells = model.grid.activeCells;
       if (model.play) {
         for (let column = 0; column < width; column++) {
           const currentCell = ((row % height) * height) + column;
@@ -167,8 +162,19 @@ jQuery(($) => {
             view.animateActiveCell(`${parent} > ${child}`);
           }
         }
-        setTimeout(runSequence.bind(null, ++row), model.bpm);
+        setTimeout(runSequencer.bind(null, ++row), model.beatLength);
       }
+    },
+
+    getPlayPermission: function getPlayPermission() {
+      const inaudible = model.audio.createBuffer(1, 22050, 44100);
+      model.triggerSound(inaudible);
+    },
+
+    togglePlay: function togglePlay() {
+      model.togglePlay();
+      this.runSequencer();
+      view.togglePlay();
     },
 
     toggleActiveKit: function toggleActiveKit() {
@@ -179,21 +185,32 @@ jQuery(($) => {
     toggleActiveCell: function toggleCell(e) {
       const column = $(e.target.parentElement).index();
       const row = $(e.target).index();
-      const gridHeight = model.sequenceGrid.height;
+      const gridHeight = model.grid.height;
 
       model.toggleActiveCell((row * gridHeight) + column);
       view.toggleActiveCell(e);
     },
 
-    togglePlay: function togglePlay() {
-      model.togglePlay();
-      this.runSequence();
-      view.togglePlay();
+    clearCells: function clearCells() {
+      model.clearCells();
+      view.clearCells();
+      if (model.play) {
+        model.togglePlay();
+        view.togglePlay();
+      }
     },
 
     setBpm: function setBpm() {
-      model.setBpm($('.bpm-input').val());
+      model.setBeatLength($('#bpm-input').val());
     },
+
+    previewDrum: function previewDrum(e) {
+      model.previewDrum(model.kits[model.activeKit][$(e.target).index()]);
+    },
+
+    toggleVisibleMeasure: function toggleVisibleMeasure() {
+      view.toggleVisibleMeasure();
+    }
   };
 
   controller.initialize();
