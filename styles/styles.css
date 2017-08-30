@@ -23,6 +23,7 @@ body {
 .main-control-bar,
 .drums-bar,
 .bpm-text,
+.sequence-column,
 .sequence-cell,
 .drum,
 .main-control-bar > section {
@@ -54,8 +55,9 @@ input[type=number]::-webkit-outer-spin-button {
 
 .sequence-column {
   flex-direction: column;
-  flex: 1;
   height: 200%;
+  margin-top: 0;
+  margin-left: 0;
 }
 
 .sequence-cell, .drum, .main-control-bar > section {
