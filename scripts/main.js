@@ -98,12 +98,27 @@ jQuery(($) => {
     },
 
     toggleVisibleMeasure: function toggleVisibleMeasure() {
+      this.visibleMeasure = this.visibleMeasure || 0;
+      this.visibleMeasure = (this.visibleMeasure + 1) % 2
+      const measure = this.visibleMeasure;
       if (window.matchMedia('(orientation: portrait)').matches) {
-        $('.sequence-column').animate({ marginTop: `${$('.sequence-column')[0].style.marginTop === '-80vh' ? 0 : '-80'}vh` });
+        $('.sequence-column').animate({ marginTop: `${measure * -80}vh` });
       } else if (window.matchMedia('(orientation: landscape)').matches) {
-        $('.sequence-column').animate({ marginLeft: `${$('.sequence-column')[0].style.marginLeft === '-80vw' ? 0 : '-80'}vw` })
+        $('.sequence-column').animate({ marginLeft: `${measure * -80}vw` });
       }
-    }
+    },
+
+    respondToOrientationChange: function respondToOrientationChange() {
+      this.visibleMeasure = this.visibleMeasure || 0;
+      const measure = this.visibleMeasure;
+      if ($('body')[0].offsetWidth > $('body')[0].offsetHeight) {
+        $('.sequence-column').css('marginTop', 0);
+        $('.sequence-column').css('marginLeft', `${measure * -80}vw`);
+      } else {
+        $('.sequence-column').css('marginTop', `${measure * -80}vh`);
+        $('.sequence-column').css('marginLeft', 0);
+      }
+    },
   };
 
   const controller = {
@@ -122,6 +137,7 @@ jQuery(($) => {
       $('.clear').on('click', this.clearCells);
       $('.drums-bar').on('click', this.previewDrum);
       $('.measure').on('click', this.toggleVisibleMeasure)
+      $(window).on('resize', this.respondToOrientationChange)
     },
 
     loadSounds: function loadSounds() {
@@ -210,6 +226,10 @@ jQuery(($) => {
 
     toggleVisibleMeasure: function toggleVisibleMeasure() {
       view.toggleVisibleMeasure();
+    },
+
+    respondToOrientationChange: function respondToOrientationChange() {
+      view.respondToOrientationChange();
     }
   };
 
