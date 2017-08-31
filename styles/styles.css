@@ -33,24 +33,6 @@ body {
   height: 10%;
 }
 
-#bpm-input {
-  width: 50%;
-  border: 0;
-  outline: none;
-  text-align: center;
-}
-
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  appearance: none;
-  margin: 0;
-}
-
-.bpm-text {
-  width: 40%;
-}
-
 .sequence-grid {
   height: 80%;
   overflow: hidden;
@@ -71,16 +53,15 @@ input[type=number]::-webkit-outer-spin-button {
   box-shadow: 1px 1px 2px #999;
 }
 
-.measure, .play, .kit, .bpm, .clear, .drum {
+.measure, .play, .kit, .bpm, .bpm-text, .clear, .drum {
   align-items: center;
   justify-content: center;
-  font-size: .6rem;
+  text-align: center;
+  font-size: .5rem;
 }
 
-.bpm-text, #bpm-input {
-  align-items: center;
-  justify-content: center;
-  font-size: .5rem;
+#bpm-input {
+  width: 100%;
 }
 
 .drum {
@@ -90,7 +71,6 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .kit, .measure {
-  text-align: center;
   font-size: .4rem;
 }
 
@@ -132,16 +112,23 @@ input[type=number]::-webkit-outer-spin-button {
     font-size: .2rem;
   }
 
-  .bpm, .play, .drum, .clear, .bpm-text, #bpm-input {
+  .bpm, .play, .drum, .clear, .bpm-text {
     font-size: .3rem;
   }
 
+  .bpm-text {
+    height: 100%;
+  }
 
   #bpm-input {
-    width: 100%;
+    height: 70%;
   }
 
   .bpm-text {
     flex-wrap: wrap;
   }
+
+  input[type="range"] {
+   transform: rotate(270deg);
+}
 }

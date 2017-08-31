@@ -133,7 +133,7 @@ jQuery(($) => {
       $('.play').one('click', this.getPlayPermission).on('click', this.togglePlay.bind(this));
       $('.kit').on('click', this.toggleActiveKit);
       $('.sequence-grid-inner').on('click', '.sequence-cell', this.toggleActiveCell);
-      $('#bpm-input').on('input', this.setBpm).inputDrag({ min: 30, max: 200 });
+      $('#bpm-input').on('input', this.setBpm);
       $('.clear').on('click', this.clearCells);
       $('.drums-bar').on('click', '.drum', this.previewDrum);
       $('.measure').on('click', this.toggleVisibleMeasure);
