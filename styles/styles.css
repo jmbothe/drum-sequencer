@@ -20,14 +20,17 @@ body {
   height: 100vh;
 }
 
-.main-control-bar,
-.drums-bar,
 .bpm-text,
 .sequence-column,
 .sequence-cell,
 .drum,
 .main-control-bar > section {
   flex: 1;
+}
+
+.main-control-bar,
+.drums-bar {
+  height: 10%;
 }
 
 #bpm-input {
@@ -49,7 +52,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .sequence-grid {
-  flex: 8;
+  height: 80%;
   overflow: hidden;
 }
 
@@ -107,6 +110,17 @@ input[type=number]::-webkit-outer-spin-button {
 
   .main-control-bar, .drums-bar, .sequence-grid-inner {
     flex-direction: column;
+  }
+
+  .main-control-bar,
+  .drums-bar {
+    height: 100%;
+    width: 10%;
+  }
+
+  .sequence-grid {
+    height: 100%;
+    width: 80%;
   }
 
   .sequence-grid-inner {
