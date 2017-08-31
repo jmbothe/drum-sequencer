@@ -53,11 +53,13 @@ input[type=number]::-webkit-outer-spin-button {
   overflow: hidden;
 }
 
+.sequence-grid-inner {
+  height: 200%;
+  flex: 1;
+}
+
 .sequence-column {
   flex-direction: column;
-  height: 200%;
-  margin-top: 0;
-  margin-left: 0;
 }
 
 .sequence-cell, .drum, .main-control-bar > section {
@@ -103,13 +105,13 @@ input[type=number]::-webkit-outer-spin-button {
     flex-direction: row;
   }
 
-  .main-control-bar, .drums-bar, .sequence-grid {
+  .main-control-bar, .drums-bar, .sequence-grid-inner {
     flex-direction: column;
   }
 
-  .sequence-column {
-    width: 200%;
-    margin-top: 0;
+  .sequence-grid-inner {
+    height: 100%;
+    min-width: 200%;
   }
 
   .kit, .measure {

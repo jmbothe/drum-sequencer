@@ -4,7 +4,7 @@ jQuery(($) => {
   const model = {
     grid: {
       height: $('.sequence-column').first().children().length,
-      width: $('.sequence-grid').children().length,
+      width: $('.sequence-grid-inner').children().length,
       activeCells: [],
     },
 
@@ -102,9 +102,9 @@ jQuery(($) => {
       this.visibleMeasure = (this.visibleMeasure + 1) % 2
       const measure = this.visibleMeasure;
       if (window.matchMedia('(orientation: portrait)').matches) {
-        $('.sequence-column').animate({ marginTop: `${measure * -80}vh` });
+        $('.sequence-grid-inner').animate({ marginTop: `${measure * -80}vh` });
       } else if (window.matchMedia('(orientation: landscape)').matches) {
-        $('.sequence-column').animate({ marginLeft: `${measure * -80}vw` });
+        $('.sequence-grid-inner').animate({ marginLeft: `${measure * -80}vw` });
       }
     },
 
@@ -112,11 +112,11 @@ jQuery(($) => {
       this.visibleMeasure = this.visibleMeasure || 0;
       const measure = this.visibleMeasure;
       if ($('body')[0].offsetWidth > $('body')[0].offsetHeight) {
-        $('.sequence-column').css('marginTop', 0);
-        $('.sequence-column').css('marginLeft', `${measure * -80}vw`);
+        $('.sequence-grid-inner').css('marginTop', 0);
+        $('.sequence-grid-inner').css('marginLeft', `${measure * -80}vw`);
       } else {
-        $('.sequence-column').css('marginTop', `${measure * -80}vh`);
-        $('.sequence-column').css('marginLeft', 0);
+        $('.sequence-grid-inner').css('marginTop', `${measure * -80}vh`);
+        $('.sequence-grid-inner').css('marginLeft', 0);
       }
     },
   };
@@ -132,12 +132,12 @@ jQuery(($) => {
     setupListeners: function setupListeners() {
       $('.play').one('click', this.getPlayPermission).on('click', this.togglePlay.bind(this));
       $('.kit').on('click', this.toggleActiveKit);
-      $('.sequence-cell').on('click', this.toggleActiveCell);
+      $('.sequence-grid-inner').on('click', '.sequence-cell', this.toggleActiveCell);
       $('#bpm-input').on('input', this.setBpm).inputDrag({ min: 30, max: 200 });
       $('.clear').on('click', this.clearCells);
-      $('.drums-bar').on('click', this.previewDrum);
-      $('.measure').on('click', this.toggleVisibleMeasure)
-      $(window).on('resize', this.respondToOrientationChange)
+      $('.drums-bar').on('click', '.drum', this.previewDrum);
+      $('.measure').on('click', this.toggleVisibleMeasure);
+      $(window).on('resize', this.respondToOrientationChange);
     },
 
     loadSounds: function loadSounds() {
@@ -145,8 +145,8 @@ jQuery(($) => {
       Object.keys(model.kits).forEach((kit) => {
         drums.forEach((drum, index) => {
           const request = new XMLHttpRequest();
-          // const audioUrl = `/assets/${kit}/${drum}.mp3`;
-          const audioUrl = `/drum-sequencer/assets/${kit}/${drum}.mp3`;
+          const audioUrl = `/assets/${kit}/${drum}.mp3`;
+          // const audioUrl = `/drum-sequencer/assets/${kit}/${drum}.mp3`;
 
           request.open('GET', audioUrl);
           request.responseType = 'arraybuffer';
