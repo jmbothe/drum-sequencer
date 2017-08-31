@@ -30,7 +30,11 @@ body {
 
 .main-control-bar,
 .drums-bar {
-  height: 10%;
+  height: 7%;
+}
+
+.bpm {
+  height: 6%;
 }
 
 .sequence-grid {
@@ -47,7 +51,7 @@ body {
   flex-direction: column;
 }
 
-.sequence-cell, .drum, .main-control-bar > section {
+.bpm, .sequence-cell, .drum, .main-control-bar > section {
   margin: 0 3px 3px 0;
   border-radius: 6px;
   box-shadow: 1px 1px 2px #999;
@@ -92,15 +96,24 @@ body {
     flex-direction: column;
   }
 
-  .main-control-bar,
-  .drums-bar {
+  .main-control-bar {
     height: 100%;
     width: 10%;
   }
 
+  .drums-bar {
+    height: 100%;
+    width: 8%;
+  }
+
+  .bpm {
+    height: 100%;
+    width: 5%;
+  }
+
   .sequence-grid {
     height: 100%;
-    width: 80%;
+    width: 77%;
   }
 
   .sequence-grid-inner {
@@ -112,23 +125,24 @@ body {
     font-size: .2rem;
   }
 
-  .bpm, .play, .drum, .clear, .bpm-text {
+  .bpm, .play, .clear, .bpm-text {
     font-size: .3rem;
   }
 
-  .bpm-text {
-    height: 100%;
+  .drum {
+    font-size: .2rem;
   }
 
-  #bpm-input {
-    height: 70%;
+  .bpm {
+    margin-bottom: 0;
   }
 
   .bpm-text {
     flex-wrap: wrap;
   }
 
-  input[type="range"] {
-   transform: rotate(270deg);
-}
+  #bpm-input {
+  width: 80vh;
+  transform: rotate(270deg);
+  }
 }
