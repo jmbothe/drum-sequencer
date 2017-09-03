@@ -1,4 +1,22 @@
+/* base code for scheduling audio events adapted from
+* Chris Wilson's Web Audio Tutorial Series
+* https://www.html5rocks.com/en/tutorials/audio/scheduling/
+*
+* drum samples downloaded for free from http://99sounds.org/
+*/
+
 'use strict';
+
+window.requestAnimFrame = ((function setRequestAnimFrame() {
+  return window.requestAnimationFrame ||
+  window.webkitRequestAnimationFrame ||
+  window.mozRequestAnimationFrame ||
+  window.oRequestAnimationFrame ||
+  window.msRequestAnimationFrame ||
+  function requestAnimFrame(callback) {
+    window.setTimeout(callback, 1000 / 60);
+  };
+})());
 
 jQuery(($) => {
   const model = {
@@ -14,18 +32,82 @@ jQuery(($) => {
       noise: {},
     },
 
-    activeKit: undefined,
+    audio: ((function initAudio() {
+      try {
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+        return new AudioContext();
+      } catch (e) {
+        alert('Web Audio API is not supported in this browser');
+        return e;
+      }
+    })()),
 
     play: false,
 
-    beatLength: undefined,
+    lastBeat: -1,
 
-    setBeatLength: function setBpm(bpm) {
-      this.beatLength = (15 / bpm) * 1000;
+    notesInQueue: [],
+
+    tempo: 120,
+
+    setTempo: function setTempo(tempo) {
+      this.tempo = tempo;
     },
 
     togglePlay: function togglePlay() {
-      this.play = this.play === false;
+      this.play = !this.play;
+      if (this.play) {
+        this.currentBeat = 0;
+        this.nextNoteTime = this.audio.currentTime;
+        this.timerID = setInterval(this.scheduler.bind(this), 25);
+      } else if (this.play === false) {
+        clearInterval(this.timerID);
+        this.timerID = null;
+      }
+    },
+
+    scheduler: function scheduler() {
+      const scheduleAheadTime = 0.1
+      while (this.nextNoteTime < this.audio.currentTime + scheduleAheadTime) {
+        this.scheduleNote(this.currentBeat, this.nextNoteTime);
+        this.nextNote();
+      }
+    },
+
+    scheduleNote: function scheduleNote(beat, time) {
+      const height = this.grid.height;
+      const width = this.grid.width;
+      const activeCells = this.grid.activeCells;
+
+      for (let column = 0; column < width; column++) {
+        const currentCell = ((beat % height) * height) + column;
+
+        if (activeCells.includes(currentCell)) {
+          this.notesInQueue.push({ beat, column, time });
+          const buffer = this.kits[this.activeKit][column];
+          this.triggerSound(buffer, time);
+        }
+      }
+    },
+
+    nextNote: function nextNote() {
+      const secondsPerBeat = 60.0 / this.tempo;
+      this.nextNoteTime += 0.25 * secondsPerBeat;
+      this.currentBeat++;
+      if (this.currentBeat === 32) {
+        this.currentBeat = 0;
+      }
+    },
+
+    triggerSound: function triggerSound(buffer, time = 0) {
+      const source = this.audio.createBufferSource();
+      source.buffer = buffer;
+      source.connect(this.audio.destination);
+      source.start(time);
+    },
+
+    previewDrum: function previewDrum(drum) {
+      this.triggerSound(drum);
     },
 
     toggleActiveKit: function toggleActiveKit() {
@@ -45,27 +127,6 @@ jQuery(($) => {
 
     clearCells: function clearCells() {
       this.grid.activeCells = [];
-    },
-
-    audio: ((function initAudio() {
-      try {
-        window.AudioContext = window.AudioContext || window.webkitAudioContext;
-        return new AudioContext();
-      } catch (e) {
-        alert('Web Audio API is not supported in this browser');
-        return e;
-      }
-    })()),
-
-    triggerSound: function triggerSound(buffer) {
-      const source = model.audio.createBufferSource();
-      source.buffer = buffer;
-      source.connect(model.audio.destination);
-      source.start(0);
-    },
-
-    previewDrum: function previewDrum(drum) {
-      this.triggerSound(drum);
     },
   };
 
@@ -126,14 +187,15 @@ jQuery(($) => {
       this.setupListeners();
       this.loadSounds();
       this.toggleActiveKit();
-      this.setBpm();
+      this.setTempo();
+      requestAnimFrame(this.animateActiveCell);
     },
 
     setupListeners: function setupListeners() {
       $('.play').one('click', this.getPlayPermission).on('click', this.togglePlay.bind(this));
       $('.kit').on('click', this.toggleActiveKit);
       $('.sequence-grid-inner').on('click', '.sequence-cell', this.toggleActiveCell);
-      $('#bpm-input').on('input', this.setBpm);
+      $('#tempo-input').on('input', this.setTempo);
       $('.clear').on('click', this.clearCells);
       $('.drums-bar').on('click', '.drum', this.previewDrum);
       $('.measure').on('click', this.toggleVisibleMeasure);
@@ -161,27 +223,6 @@ jQuery(($) => {
       });
     },
 
-    runSequencer: function runSequencer(row = 0) {
-      const height = model.grid.height;
-      const width = model.grid.width;
-      const activeCells = model.grid.activeCells;
-      if (model.play) {
-        for (let column = 0; column < width; column++) {
-          const currentCell = ((row % height) * height) + column;
-
-          if (activeCells.includes(currentCell)) {
-            const parent = `.sequence-column:nth-child(${column + 1})`;
-            const child = `.sequence-cell:nth-child(${(row % height) + 1})`;
-            const buffer = model.kits[model.activeKit][column];
-
-            model.triggerSound(buffer);
-            view.animateActiveCell(`${parent} > ${child}`);
-          }
-        }
-        setTimeout(runSequencer.bind(null, ++row), model.beatLength);
-      }
-    },
-
     getPlayPermission: function getPlayPermission() {
       const inaudible = model.audio.createBuffer(1, 22050, 44100);
       model.triggerSound(inaudible);
@@ -189,7 +230,6 @@ jQuery(($) => {
 
     togglePlay: function togglePlay() {
       model.togglePlay();
-      this.runSequencer();
       view.togglePlay();
     },
 
@@ -216,8 +256,27 @@ jQuery(($) => {
       }
     },
 
-    setBpm: function setBpm() {
-      model.setBeatLength($('#bpm-input').val());
+    animateActiveCell: function animateActiveCell() {
+      let beat = model.lastBeat;
+      const currentTime = model.audio.currentTime;
+      const height = model.grid.height;
+
+      while (model.notesInQueue.length && model.notesInQueue[0].time < currentTime) {
+        beat = model.notesInQueue[0].beat;
+        let column = model.notesInQueue[0].column
+        model.notesInQueue.splice(0, 1);
+        if (model.lastBeat != beat) {
+          const parent = `.sequence-column:nth-child(${column + 1})`;
+          const child = `.sequence-cell:nth-child(${(beat % height) + 1})`;
+          view.animateActiveCell(`${parent} > ${child}`);
+        }
+      }
+      model.lastBeat = beat;
+      requestAnimFrame(animateActiveCell);
+    },
+
+    setTempo: function setTempo() {
+      model.setTempo($('#tempo-input').val());
     },
 
     previewDrum: function previewDrum(e) {
@@ -230,7 +289,7 @@ jQuery(($) => {
 
     respondToOrientationChange: function respondToOrientationChange() {
       view.respondToOrientationChange();
-    }
+    },
   };
 
   controller.initialize();
