@@ -1,4 +1,5 @@
-/* base code for scheduling audio events adapted from
+/*
+* base code for scheduling audio events adapted from
 * Chris Wilson's Web Audio Tutorial Series
 * https://www.html5rocks.com/en/tutorials/audio/scheduling/
 *
@@ -21,8 +22,8 @@ window.requestAnimFrame = ((function setRequestAnimFrame() {
 jQuery(($) => {
   const model = {
     grid: {
-      height: $('.sequence-column').first().children().length,
-      width: $('.sequence-grid-inner').children().length,
+      height: $('.sequence-grid-inner').children().length,
+      width: $('.sequence-row').first().children().length,
       activeCells: [],
     },
 
@@ -44,11 +45,7 @@ jQuery(($) => {
 
     play: false,
 
-    lastBeat: -1,
-
     notesInQueue: [],
-
-    tempo: 120,
 
     setTempo: function setTempo(tempo) {
       this.tempo = tempo;
@@ -79,11 +76,12 @@ jQuery(($) => {
       const width = this.grid.width;
       const activeCells = this.grid.activeCells;
 
+      this.notesInQueue.push({ beat, time });
+
       for (let column = 0; column < width; column++) {
-        const currentCell = ((beat % height) * height) + column;
+        const currentCell = (beat * height) + column;
 
         if (activeCells.includes(currentCell)) {
-          this.notesInQueue.push({ beat, column, time });
           const buffer = this.kits[this.activeKit][column];
           this.triggerSound(buffer, time);
         }
@@ -144,14 +142,11 @@ jQuery(($) => {
       $(e.target).toggleClass('active-cell');
     },
 
-    animateActiveCell: function animateActiveCell(cell) {
-      $(cell).animate({
-        opacity: 0.5,
-      }, 50, function endAnimation() {
-        $(this).animate({
-          opacity: 1,
-        }, 50);
-      });
+    animateActiveCells: function animateActiveCells(cells) {
+      $(cells).toggleClass('animate-cell');
+      setTimeout(() => {
+        $(cells).toggleClass('animate-cell');
+      }, model.tempo / 2);
     },
 
     clearCells: function clearCells() {
@@ -160,7 +155,7 @@ jQuery(($) => {
 
     toggleVisibleMeasure: function toggleVisibleMeasure() {
       this.visibleMeasure = this.visibleMeasure || 0;
-      this.visibleMeasure = (this.visibleMeasure + 1) % 2
+      this.visibleMeasure = (this.visibleMeasure + 1) % 2;
       const measure = this.visibleMeasure;
       if (window.matchMedia('(orientation: portrait)').matches) {
         $('.sequence-grid-inner').animate({ marginTop: `${measure * -80}vh` });
@@ -188,7 +183,7 @@ jQuery(($) => {
       this.loadSounds();
       this.toggleActiveKit();
       this.setTempo();
-      requestAnimFrame(this.animateActiveCell);
+      requestAnimFrame(this.animateActiveCells.bind(this));
     },
 
     setupListeners: function setupListeners() {
@@ -203,7 +198,7 @@ jQuery(($) => {
     },
 
     loadSounds: function loadSounds() {
-      const drums = ['hat', 'kick', 'snare', 'tom', 'crash', 'perc1', 'perc2', 'perc3']
+      const drums = ['hat', 'kick', 'snare', 'tom', 'crash', 'perc1', 'perc2', 'perc3'];
       Object.keys(model.kits).forEach((kit) => {
         drums.forEach((drum, index) => {
           const request = new XMLHttpRequest();
@@ -239,11 +234,11 @@ jQuery(($) => {
     },
 
     toggleActiveCell: function toggleCell(e) {
-      const column = $(e.target.parentElement).index();
-      const row = $(e.target).index();
-      const gridHeight = model.grid.height;
+      const row = $(e.target.parentElement).index();
+      const column = $(e.target).index();
+      const height = model.grid.height;
 
-      model.toggleActiveCell((row * gridHeight) + column);
+      model.toggleActiveCell((row * height) + column);
       view.toggleActiveCell(e);
     },
 
@@ -256,23 +251,21 @@ jQuery(($) => {
       }
     },
 
-    animateActiveCell: function animateActiveCell() {
-      let beat = model.lastBeat;
-      const currentTime = model.audio.currentTime;
-      const height = model.grid.height;
+    animateActiveCells: function animateActiveCells() {
+      this.lastBeat = this.lastBeat || -1;
+      let currentBeat = this.lastBeat;
+      let currentTime = model.audio.currentTime;
 
       while (model.notesInQueue.length && model.notesInQueue[0].time < currentTime) {
-        beat = model.notesInQueue[0].beat;
-        let column = model.notesInQueue[0].column
+        currentBeat = model.notesInQueue[0].beat;
         model.notesInQueue.splice(0, 1);
-        if (model.lastBeat != beat) {
-          const parent = `.sequence-column:nth-child(${column + 1})`;
-          const child = `.sequence-cell:nth-child(${(beat % height) + 1})`;
-          view.animateActiveCell(`${parent} > ${child}`);
-        }
       }
-      model.lastBeat = beat;
-      requestAnimFrame(animateActiveCell);
+      if (this.lastBeat !== currentBeat) {
+        const row = `.sequence-row:nth-child(${currentBeat + 1})`;
+        view.animateActiveCells(`${row} > .sequence-cell`);
+        this.lastBeat = currentBeat;
+      }
+      requestAnimFrame(animateActiveCells.bind(this));
     },
 
     setTempo: function setTempo() {

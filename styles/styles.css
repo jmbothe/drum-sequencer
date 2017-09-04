@@ -20,7 +20,7 @@ body {
   height: 100vh;
 }
 
-.sequence-column,
+.sequence-row,
 .sequence-cell,
 .drum,
 .main-control-bar > section {
@@ -42,12 +42,9 @@ body {
 }
 
 .sequence-grid-inner {
+  flex-direction: column;
   height: 200%;
   width: 100%;
-}
-
-.sequence-column {
-  flex-direction: column;
 }
 
 #tempo-input, .sequence-cell, .drum, .main-control-bar > section {
@@ -86,13 +83,17 @@ body {
   background-color: hsl(45, 80%, 55%);
 }
 
+.animate-cell {
+  background-color: hsla(30, 80%, 55%, .5);
+}
+
 @media only screen and (orientation: landscape) {
 
-  body, .sequence-column {
+  body, .sequence-grid-inner {
     flex-direction: row;
   }
 
-  .main-control-bar, .drums-bar, .sequence-grid-inner {
+  .main-control-bar, .drums-bar, .sequence-row {
     flex-direction: column;
   }
 
