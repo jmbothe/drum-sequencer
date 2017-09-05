@@ -63,7 +63,9 @@ function runSequencer() {
 }
 ```
 
-It performed reasonably well in a laptop browser, but when used on a mobile browser the timing would lag severely whenever the orientation changed, or whenever the user toggled the measure view or other buttons. Sometimes it would get so far behind that it would lose the rhythm completely, sounding as though it were galloping rather than keeping precise time. Continuing on the Web Audio API tutorial search, I found [this gem](https://www.html5rocks.com/en/tutorials/audio/scheduling/) by Chris Wilson, wherein he lays out a basic framework for scheduling audio events with razor-sharp precision. The Web Audio clock is more precise than the JS clock by orders of magnitude, and since Web Audio events are processed on their own thread, their firing is not delayed by other events occurring on the main JS execution thread. Implementing Chris's framework meant completely restructuring my audio model, digging deep to understand the functionality of three different timing systems--`setInterval`, `AudioContext.currentTime()`, and `requestAnimationFrame()`--and tweaking and restructuring all of it to fit this project's specific needs. But the end result is a world of difference in terms of performance. Now you can rapidly toggle every cell in the sequencer grid, recklessly toggle back and forth between measures, and swap out drum samples without ever losing a beat.
+It performed reasonably well in a laptop browser, but when used on a mobile browser the timing would lag severely whenever the orientation changed, or whenever the user toggled the measure view or other buttons. Sometimes it would get so far behind that it would lose the rhythm completely, sounding as though it were galloping rather than keeping precise time. As you may already know, this is due to the way the JS engine event loop is structured. In one cycle of the event loop, setTimeout callbacks are processed after all other functions in the call stack, and so their timing is only guarunteed as a minimum timeout. In practice, it could be a significantly longer timeout depending on how backed up the stack is.
+
+Continuing on the Web Audio API tutorial search, I found [this gem](https://www.html5rocks.com/en/tutorials/audio/scheduling/) by Chris Wilson, wherein he lays out a basic framework for scheduling audio events with razor-sharp precision. The Web Audio API has its own clock that is more precise than the JS clock by orders of magnitude, and since Web Audio events are processed on their own thread, their firing is not delayed by other events occurring on the main JS execution thread. Implementing Chris's framework meant completely restructuring my audio model, digging deep to understand the functionality of three different timing systems--`setInterval`, `AudioContext.currentTime()`, and `requestAnimationFrame()`--and tweaking and restructuring all of it to fit this project's specific needs. But the end result is a world of difference in terms of performance. Now you can rapidly toggle every cell in the sequencer grid, recklessly toggle back and forth between measures, and repeatedly swap out drum samples without ever losing a beat.
 
 ### Responsive design nightmare.
 
@@ -86,6 +88,7 @@ Inspiration
 * [Getting Started with the Web Audio API](https://www.html5rocks.com/en/tutorials/webaudio/intro/), Boris Smus, @borismus
 * [A Tale of Two Clocks](https://www.html5rocks.com/en/tutorials/audio/scheduling/), Chris Wilson, @cwilso
 * [Clean Code JavaScript](https://github.com/ryanmcdermott/clean-code-javascript), Ryan McDermott, @ryanmcdermott
+* [99 Sounds](http://99sounds.org/), free sound effects and sample libraries
 
 <a name="License"/>
 
