@@ -1,4 +1,5 @@
-# drum sequencer
+![logo](/assets/logo.jpg)
+---
 
 #### A learning project focused on leveling-up with:
 * [Jquery](https://jquery.com/) DOM traversal and manipulation.
