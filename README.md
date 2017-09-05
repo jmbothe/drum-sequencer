@@ -27,10 +27,10 @@
 
 ## Description
 
-This is a very basic drum sequencer that has three options for drum kit sounds, two toggleable measures of 16th notes, and a tempo slider that ranges between 30bpm and 200bpm. It was built as a learning exercise in jQuery, but quickly grew to double as a serious challenge in wrangling the Web Audio API.
+This is a very basic drum sequencer that has three options for drum kit sounds, two toggleable measures of 16th notes, and a tempo slider that ranges between 30bpm and 200bpm. It was originally conceived as a learning exercise in jQuery, but quickly grew to double as a serious challenge in wrangling the Web Audio API.
 
 #### How is jQuery used in this drum sequencer?
-* To setup event listeners for clicks, user input, and window resizing.
+* To setup listeners for events like clicks and other user input.
 * To animate interactive elements of the drum sequencer.
 * To dynamically manipulate text content.
 * And much, much more!
