@@ -187,9 +187,11 @@ jQuery(($) => {
     },
 
     setupListeners: function setupListeners() {
-      $('.play').one('click', this.getPlayPermission).on('click', this.togglePlay.bind(this));
+      $('.play').one('click', this.getPlayPermission)
+        .on('click', this.togglePlay.bind(this));
       $('.kit').on('click', this.toggleActiveKit);
-      $('.sequence-grid-inner').on('click', '.sequence-cell', this.toggleActiveCell);
+      $('.sequence-grid-inner')
+        .on('click', '.sequence-cell', this.toggleActiveCell);
       $('#tempo-input').on('input', this.setTempo);
       $('.clear').on('click', this.clearCells);
       $('.drums-bar').on('click', '.drum', this.previewDrum);
@@ -198,7 +200,9 @@ jQuery(($) => {
     },
 
     loadSounds: function loadSounds() {
-      const drums = ['hat', 'kick', 'snare', 'tom', 'crash', 'perc1', 'perc2', 'perc3'];
+      const drums =
+        ['hat', 'kick', 'snare', 'tom', 'crash', 'perc1', 'perc2', 'perc3'];
+
       Object.keys(model.kits).forEach((kit) => {
         drums.forEach((drum, index) => {
           const request = new XMLHttpRequest();
