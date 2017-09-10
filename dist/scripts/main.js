@@ -233,8 +233,8 @@ jQuery(function ($) {
       Object.keys(model.kits).forEach(function (kit) {
         drums.forEach(function (drum, index) {
           var request = new XMLHttpRequest();
-          var audioUrl = '/assets/' + kit + '/' + drum + '.mp3';
-          // const audioUrl = `/drum-sequencer/assets/${kit}/${drum}.mp3`;
+          // const audioUrl = `/assets/${kit}/${drum}.mp3`;
+          var audioUrl = '/drum-sequencer/assets/' + kit + '/' + drum + '.mp3';
 
           request.open('GET', audioUrl);
           request.responseType = 'arraybuffer';
