@@ -21,7 +21,7 @@
 
 ## Demo
 
-[Try it out!](https://jmbothe.github.io/drum-sequencer/)
+[Try it out!](https://jmbothe.github.io/drum-sequencer/dist)
 
 <a name="description"/>
 
@@ -67,7 +67,7 @@ It performed reasonably well in a laptop browser, but when used on a mobile brow
 
 Continuing on the Web Audio API tutorial search, I found [this gem](https://www.html5rocks.com/en/tutorials/audio/scheduling/) by Chris Wilson, wherein he lays out a basic framework for scheduling audio events with razor-sharp precision. The Web Audio API has its own clock that is more precise than the JS clock by orders of magnitude, and since Web Audio events are processed on their own thread, their firing is not delayed by other events occurring on the main JS execution thread. Implementing Chris's framework meant completely restructuring my audio model, digging deep to understand the functionality of three different timing systems--`setInterval`, `AudioContext.currentTime()`, and `requestAnimationFrame()`--and tweaking and restructuring all of it to fit this project's specific needs. But the end result is a world of difference in terms of performance. Now you can rapidly toggle every cell in the sequencer grid, recklessly toggle back and forth between measures, and repeatedly swap out drum samples without ever losing a beat.
 
-### Responsive design nightmare.
+### Browser compatability and the usefulness of tools.
 
 text
 
