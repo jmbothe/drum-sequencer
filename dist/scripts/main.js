@@ -20,28 +20,36 @@ jQuery(function ($) {
     grid: {
       height: $('.sequence-grid-inner').children().length,
       width: $('.sequence-row').first().children().length,
+
+      // array of ordinal numbers representing grid coordinates
       activeCells: []
     },
 
+    // kits populated with audio buffers in controller.loadSounds() Ajax request
     kits: {
       '808 kit': {},
       acoustic: {},
       noise: {}
     },
 
+    // core audio context
     audio: function initAudio() {
       try {
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
         return new AudioContext();
       } catch (e) {
-        alert('Web Audio API is not supported in this browser');
+        alert('We\'re sorry, but Web Audio API is not supported in this browser. This app will not function in this browser. Try Chrome or Firefox.');
         return e;
       }
     }(),
 
     play: false,
 
-    notesInQueue: [],
+    /**
+     * beatsInQueue represents grid rows to animate during playback.
+     * populated in this.scheduleBeat(). used in controller.animateActiveCells()
+     */
+    beatsInQueue: [],
 
     setTempo: function setTempo(tempo) {
       this.tempo = tempo;
@@ -51,7 +59,7 @@ jQuery(function ($) {
       this.play = !this.play;
       if (this.play) {
         this.currentBeat = 0;
-        this.nextNoteTime = this.audio.currentTime;
+        this.nextBeatTime = this.audio.currentTime;
         this.timerID = setInterval(this.scheduler.bind(this), 25);
       } else if (this.play === false) {
         clearInterval(this.timerID);
@@ -59,22 +67,33 @@ jQuery(function ($) {
       }
     },
 
+    /**
+     * scheduler() looks ahead 100ms and schedules playback of any beats
+     * that will occur within that time. It will always play the first beat
+     * when togglePlay() is called.
+     */
     scheduler: function scheduler() {
+      // how far ahead to schedule beat playback, in seconds
       var scheduleAheadTime = 0.1;
-      while (this.nextNoteTime < this.audio.currentTime + scheduleAheadTime) {
-        this.scheduleNote(this.currentBeat, this.nextNoteTime);
+
+      // schedule next beat if it falls within the next 100ms
+      while (this.nextBeatTime < this.audio.currentTime + scheduleAheadTime) {
+        this.scheduleBeat(this.currentBeat, this.nextBeatTime);
         this.nextNote();
       }
     },
 
-    scheduleNote: function scheduleNote(beat, time) {
+    scheduleBeat: function scheduleBeat(beat, time) {
       var height = this.grid.height;
       var width = this.grid.width;
       var activeCells = this.grid.activeCells;
 
-      this.notesInQueue.push({ beat: beat, time: time });
+      // queue beat to animate grid row with controller.animateActiveCells()
+      this.beatsInQueue.push({ beat: beat, time: time });
 
       for (var column = 0; column < width; column++) {
+
+        // convert cell coordinates into ordinal number
         var currentCell = beat * height + column;
 
         if (activeCells.includes(currentCell)) {
@@ -86,13 +105,14 @@ jQuery(function ($) {
 
     nextNote: function nextNote() {
       var secondsPerBeat = 60.0 / this.tempo;
-      this.nextNoteTime += 0.25 * secondsPerBeat;
+      this.nextBeatTime += 0.25 * secondsPerBeat;
       this.currentBeat++;
       if (this.currentBeat === 32) {
         this.currentBeat = 0;
       }
     },
 
+    // basic web audio API playback function
     triggerSound: function triggerSound(buffer) {
       var time = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
 
@@ -109,6 +129,8 @@ jQuery(function ($) {
     toggleActiveKit: function toggleActiveKit() {
       var kits = Object.keys(this.kits);
       var nextKit = (kits.indexOf(this.activeKit) + 1) % kits.length;
+
+      // sets this.activeKit on first call
       this.activeKit = kits[nextKit];
     },
 
@@ -151,6 +173,13 @@ jQuery(function ($) {
       $('.active-cell').toggleClass('active-cell');
     },
 
+    animateButton: function animateButton(target) {
+      $(target).toggleClass('animate-button');
+      setTimeout(function () {
+        $(target).toggleClass('animate-button');
+      }, 200);
+    },
+
     toggleVisibleMeasure: function toggleVisibleMeasure() {
       this.visibleMeasure = this.visibleMeasure || 0;
       this.visibleMeasure = (this.visibleMeasure + 1) % 2;
@@ -160,13 +189,6 @@ jQuery(function ($) {
       } else if (window.matchMedia('(orientation: landscape)').matches) {
         $('.sequence-grid-inner').animate({ marginLeft: measure * -80 + 'vw' });
       }
-    },
-
-    animateButton: function animateButton(target) {
-      $(target).toggleClass('animate-button');
-      setTimeout(function () {
-        $(target).toggleClass('animate-button');
-      }, 200);
     },
 
     respondToOrientationChange: function respondToOrientationChange() {
@@ -204,19 +226,25 @@ jQuery(function ($) {
     },
 
     loadSounds: function loadSounds() {
+
+      // map of mp3 file names
       var drums = ['hat', 'kick', 'snare', 'tom', 'crash', 'perc1', 'perc2', 'perc3'];
 
       Object.keys(model.kits).forEach(function (kit) {
         drums.forEach(function (drum, index) {
           var request = new XMLHttpRequest();
-          var audioUrl = '/assets/' + kit + '/' + drum + '.mp3';
-          // const audioUrl = `/drum-sequencer/assets/${kit}/${drum}.mp3`;
+          // const audioUrl = `/assets/${kit}/${drum}.mp3`;
+          var audioUrl = '/drum-sequencer/assets/' + kit + '/' + drum + '.mp3';
 
           request.open('GET', audioUrl);
           request.responseType = 'arraybuffer';
 
           request.onload = function onload() {
+
+            // convert arraybuffer to audio buffer
             model.audio.decodeAudioData(request.response, function (buffer) {
+
+              // insert audio buffer into corresponding slot in kit array
               model.kits[kit][index] = buffer;
             });
           };
@@ -225,11 +253,17 @@ jQuery(function ($) {
       });
     },
 
+    /**
+     * work around mobile browser audio restrictions. Playing any sound,
+     * including silence, on direct user trigger of an event lifts restrictions.
+     * This function is called once: the first time user presses 'play'
+     */
     getPlayPermission: function getPlayPermission() {
       var inaudible = model.audio.createBuffer(1, 22050, 44100);
       model.triggerSound(inaudible);
     },
 
+    // obsessive MVC structuring
     togglePlay: function togglePlay() {
       model.togglePlay();
       view.togglePlay();
@@ -245,6 +279,7 @@ jQuery(function ($) {
       var column = $(e.target).index();
       var height = model.grid.height;
 
+      // convert cell grid coordinates into ordinal number
       model.toggleActiveCell(row * height + column);
       view.toggleActiveCell(e);
     },
@@ -258,21 +293,34 @@ jQuery(function ($) {
       }
     },
 
+    /**
+     * animateActiveCells() continuously checks if any scheduled beats have played,
+     * and animates the coresponding grid row as needed. default lastRow = -1
+     * means no rows have been animated yet
+     */
     animateActiveCells: function animateActiveCells() {
-      this.lastBeat = this.lastBeat || -1;
-      var currentBeat = this.lastBeat;
+      var lastRow = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : -1;
+
+      var rowToAnimate = lastRow;
       var currentTime = model.audio.currentTime;
 
-      while (model.notesInQueue.length && model.notesInQueue[0].time < currentTime) {
-        currentBeat = model.notesInQueue[0].beat;
-        model.notesInQueue.splice(0, 1);
+      // if a queued beat has played...
+      while (model.beatsInQueue.length && model.beatsInQueue[0].time < currentTime) {
+
+        // ... set its row to be animated, and remove it from queue
+        rowToAnimate = model.beatsInQueue[0].beat;
+        model.beatsInQueue.splice(0, 1);
       }
-      if (this.lastBeat !== currentBeat) {
-        var row = '.sequence-row:nth-child(' + (currentBeat + 1) + ')';
+
+      // if the while loop updated row to be animated, animate the row
+      if (lastRow !== rowToAnimate) {
+        var row = '.sequence-row:nth-child(' + (rowToAnimate + 1) + ')';
         view.animateActiveCells(row + ' > .sequence-cell');
-        this.lastBeat = currentBeat;
+
+        // update last row that was animated
+        lastRow = rowToAnimate;
       }
-      requestAnimFrame(animateActiveCells.bind(this));
+      requestAnimFrame(animateActiveCells.bind(this, lastRow));
     },
 
     setTempo: function setTempo() {
