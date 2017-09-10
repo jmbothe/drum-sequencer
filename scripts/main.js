@@ -169,7 +169,7 @@ jQuery(($) => {
       $(cells).toggleClass('animate-cell');
       setTimeout(() => {
         $(cells).toggleClass('animate-cell');
-      }, model.tempo / 2);
+      }, model.tempo / 1.5);
     },
 
     clearCells: function clearCells() {
@@ -180,7 +180,7 @@ jQuery(($) => {
       $(target).toggleClass('animate-button');
       setTimeout(() => {
         $(target).toggleClass('animate-button');
-      }, 200);
+      }, 150);
     },
 
     toggleVisibleMeasure: function toggleVisibleMeasure() {
@@ -239,8 +239,8 @@ jQuery(($) => {
       Object.keys(model.kits).forEach((kit) => {
         drums.forEach((drum, index) => {
           const request = new XMLHttpRequest();
-          // const audioUrl = `/assets/${kit}/${drum}.mp3`;
-          const audioUrl = `/drum-sequencer/assets/${kit}/${drum}.mp3`;
+          const audioUrl = `/assets/${kit}/${drum}.mp3`;
+          // const audioUrl = `/drum-sequencer/assets/${kit}/${drum}.mp3`;
 
           request.open('GET', audioUrl);
           request.responseType = 'arraybuffer';
