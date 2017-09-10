@@ -166,7 +166,7 @@ jQuery(function ($) {
       $(cells).toggleClass('animate-cell');
       setTimeout(function () {
         $(cells).toggleClass('animate-cell');
-      }, model.tempo / 2);
+      }, model.tempo / 1.5);
     },
 
     clearCells: function clearCells() {
@@ -177,7 +177,7 @@ jQuery(function ($) {
       $(target).toggleClass('animate-button');
       setTimeout(function () {
         $(target).toggleClass('animate-button');
-      }, 200);
+      }, 150);
     },
 
     toggleVisibleMeasure: function toggleVisibleMeasure() {
@@ -233,8 +233,8 @@ jQuery(function ($) {
       Object.keys(model.kits).forEach(function (kit) {
         drums.forEach(function (drum, index) {
           var request = new XMLHttpRequest();
-          // const audioUrl = `/assets/${kit}/${drum}.mp3`;
-          var audioUrl = '/drum-sequencer/assets/' + kit + '/' + drum + '.mp3';
+          var audioUrl = '/assets/' + kit + '/' + drum + '.mp3';
+          // const audioUrl = `/drum-sequencer/assets/${kit}/${drum}.mp3`;
 
           request.open('GET', audioUrl);
           request.responseType = 'arraybuffer';

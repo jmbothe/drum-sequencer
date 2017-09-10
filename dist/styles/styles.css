@@ -81,12 +81,10 @@ body {
 
 .active-cell {
   background-color: hsl(45, 80%, 55%);
-  transition: 50ms;
 }
 
 .animate-cell, .animate-button {
   background-color: hsla(30, 80%, 55%, .5);
-  transition: 50ms;
 }
 
 @media only screen and (orientation: landscape) {

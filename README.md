@@ -71,6 +71,10 @@ Continuing on the Web Audio API tutorial search, I found [this gem](https://www.
 
 I listen to several JavaScript podcast and follow a few blogs, and some common themes I have noticed include the debate over the proliferation of JS frameworks and tools, complaints about so-called "JavaScript Fatigue", and some calls for a back-to-basics approach to coding. As a newbie I have found all of these conversations edifying, but I haven't really had to deal with any of these problems first-hand because all of my projects are very light-weight. The only tool I am currently using is Babel for compiling my JS to browser-compatible code. I've found it nearly impossible to keep up with which features are compatible with which browsers, so it's nice to know that there is at least one quick, easy step I can take to alleviate certain time-consuming frustrations. For this project specifically, I knew ahead of time that Internet Explorer wouldn't support the Web Audio API, and I coded a `try... throw` statement that would alert IE users as such. But before I had compiled the code with Babel, IE was throwing errors about ES2015, blocking further code execution, and preventing users from seeing the alert. Granted that a nasty alert telling you your browser sucks is not every user's dream, but it's significantly better than a half-loaded frozen app with zero functionality. I am sure that down the road I will feel the fatigue and learn to loathe my apps' dependencies, but for now I am drinking the Babel Kool-Aid and loving it.
 
+### Note on Accessibility
+
+There is so, so, so much more I could do to make this app (and all of my apps) more accessible. However, I would like to specifically point out, for anyone who might be conerned, that I intentionally set the maximum tempo to 150bpm so that--in accordance with the WCAG 2.0 specifications regarding design features known to cause seizures--the grid rows would flash fewer than three times per second.
+
 <a name="contributing"/>
 
 ## Contributing
