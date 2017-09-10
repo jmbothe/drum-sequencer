@@ -8,33 +8,28 @@
 
 'use strict';
 
-jQuery(($) => {
+jQuery(function ($) {
 
-  window.requestAnimFrame = ((function setRequestAnimFrame() {
-    return window.requestAnimationFrame ||
-    window.webkitRequestAnimationFrame ||
-    window.mozRequestAnimationFrame ||
-    window.oRequestAnimationFrame ||
-    window.msRequestAnimationFrame ||
-    function requestAnimFrame(callback) {
+  window.requestAnimFrame = function setRequestAnimFrame() {
+    return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function requestAnimFrame(callback) {
       window.setTimeout(callback, 1000 / 60);
     };
-  })());
+  }();
 
-  const model = {
+  var model = {
     grid: {
       height: $('.sequence-grid-inner').children().length,
       width: $('.sequence-row').first().children().length,
-      activeCells: [],
+      activeCells: []
     },
 
     kits: {
       '808 kit': {},
       acoustic: {},
-      noise: {},
+      noise: {}
     },
 
-    audio: ((function initAudio() {
+    audio: function initAudio() {
       try {
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
         return new AudioContext();
@@ -42,7 +37,7 @@ jQuery(($) => {
         alert('Web Audio API is not supported in this browser');
         return e;
       }
-    })()),
+    }(),
 
     play: false,
 
@@ -65,7 +60,7 @@ jQuery(($) => {
     },
 
     scheduler: function scheduler() {
-      const scheduleAheadTime = 0.1
+      var scheduleAheadTime = 0.1;
       while (this.nextNoteTime < this.audio.currentTime + scheduleAheadTime) {
         this.scheduleNote(this.currentBeat, this.nextNoteTime);
         this.nextNote();
@@ -73,24 +68,24 @@ jQuery(($) => {
     },
 
     scheduleNote: function scheduleNote(beat, time) {
-      const height = this.grid.height;
-      const width = this.grid.width;
-      const activeCells = this.grid.activeCells;
+      var height = this.grid.height;
+      var width = this.grid.width;
+      var activeCells = this.grid.activeCells;
 
-      this.notesInQueue.push({ beat, time });
+      this.notesInQueue.push({ beat: beat, time: time });
 
-      for (let column = 0; column < width; column++) {
-        const currentCell = (beat * height) + column;
+      for (var column = 0; column < width; column++) {
+        var currentCell = beat * height + column;
 
         if (activeCells.includes(currentCell)) {
-          const buffer = this.kits[this.activeKit][column];
+          var buffer = this.kits[this.activeKit][column];
           this.triggerSound(buffer, time);
         }
       }
     },
 
     nextNote: function nextNote() {
-      const secondsPerBeat = 60.0 / this.tempo;
+      var secondsPerBeat = 60.0 / this.tempo;
       this.nextNoteTime += 0.25 * secondsPerBeat;
       this.currentBeat++;
       if (this.currentBeat === 32) {
@@ -98,8 +93,10 @@ jQuery(($) => {
       }
     },
 
-    triggerSound: function triggerSound(buffer, time = 0) {
-      const source = this.audio.createBufferSource();
+    triggerSound: function triggerSound(buffer) {
+      var time = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+
+      var source = this.audio.createBufferSource();
       source.buffer = buffer;
       source.connect(this.audio.destination);
       source.start(time);
@@ -110,13 +107,13 @@ jQuery(($) => {
     },
 
     toggleActiveKit: function toggleActiveKit() {
-      const kits = Object.keys(this.kits);
-      const nextKit = (kits.indexOf(this.activeKit) + 1) % kits.length;
+      var kits = Object.keys(this.kits);
+      var nextKit = (kits.indexOf(this.activeKit) + 1) % kits.length;
       this.activeKit = kits[nextKit];
     },
 
     toggleActiveCell: function toggleActiveCell(cell) {
-      const cellIndex = this.grid.activeCells.indexOf(cell);
+      var cellIndex = this.grid.activeCells.indexOf(cell);
       if (cellIndex !== -1) {
         this.grid.activeCells.splice(cellIndex, 1);
       } else {
@@ -126,17 +123,17 @@ jQuery(($) => {
 
     clearCells: function clearCells() {
       this.grid.activeCells = [];
-    },
+    }
   };
 
-  const view = {
+  var view = {
     togglePlay: function togglePlay() {
-      const newText = $('.play').text() === 'play' ? 'stop' : 'play';
+      var newText = $('.play').text() === 'play' ? 'stop' : 'play';
       $('.play').text(newText);
     },
 
     toggleActiveKit: function toggleActiveKit() {
-      $('.kit').text(`${model.activeKit}`);
+      $('.kit').text('' + model.activeKit);
     },
 
     toggleActiveCell: function toggleActiveCell(e) {
@@ -145,7 +142,7 @@ jQuery(($) => {
 
     animateActiveCells: function animateActiveCells(cells) {
       $(cells).toggleClass('animate-cell');
-      setTimeout(() => {
+      setTimeout(function () {
         $(cells).toggleClass('animate-cell');
       }, model.tempo / 2);
     },
@@ -157,35 +154,35 @@ jQuery(($) => {
     toggleVisibleMeasure: function toggleVisibleMeasure() {
       this.visibleMeasure = this.visibleMeasure || 0;
       this.visibleMeasure = (this.visibleMeasure + 1) % 2;
-      const measure = this.visibleMeasure;
+      var measure = this.visibleMeasure;
       if (window.matchMedia('(orientation: portrait)').matches) {
-        $('.sequence-grid-inner').animate({ marginTop: `${measure * -80}vh` });
+        $('.sequence-grid-inner').animate({ marginTop: measure * -80 + 'vh' });
       } else if (window.matchMedia('(orientation: landscape)').matches) {
-        $('.sequence-grid-inner').animate({ marginLeft: `${measure * -80}vw` });
+        $('.sequence-grid-inner').animate({ marginLeft: measure * -80 + 'vw' });
       }
     },
 
     animateButton: function animateButton(target) {
       $(target).toggleClass('animate-button');
-      setTimeout(() => {
+      setTimeout(function () {
         $(target).toggleClass('animate-button');
       }, 200);
     },
 
     respondToOrientationChange: function respondToOrientationChange() {
       this.visibleMeasure = this.visibleMeasure || 0;
-      const measure = this.visibleMeasure;
+      var measure = this.visibleMeasure;
       if ($('body')[0].offsetWidth > $('body')[0].offsetHeight) {
         $('.sequence-grid-inner').css('marginTop', 0);
-        $('.sequence-grid-inner').css('marginLeft', `${measure * -80}vw`);
+        $('.sequence-grid-inner').css('marginLeft', measure * -80 + 'vw');
       } else {
-        $('.sequence-grid-inner').css('marginTop', `${measure * -80}vh`);
+        $('.sequence-grid-inner').css('marginTop', measure * -80 + 'vh');
         $('.sequence-grid-inner').css('marginLeft', 0);
       }
-    },
+    }
   };
 
-  const controller = {
+  var controller = {
     initialize: function initialize() {
       this.setupListeners();
       this.loadSounds();
@@ -196,11 +193,9 @@ jQuery(($) => {
 
     setupListeners: function setupListeners() {
       $('.main-control-bar, .drums-bar').on('click', this.animateButton);
-      $('.play').one('click', this.getPlayPermission)
-        .on('click', this.togglePlay.bind(this));
+      $('.play').one('click', this.getPlayPermission).on('click', this.togglePlay.bind(this));
       $('.kit').on('click', this.toggleActiveKit);
-      $('.sequence-grid-inner')
-        .on('click', '.sequence-cell', this.toggleActiveCell);
+      $('.sequence-grid-inner').on('click', '.sequence-cell', this.toggleActiveCell);
       $('#tempo-input').on('input', this.setTempo);
       $('.clear').on('click', this.clearCells);
       $('.drums-bar').on('click', '.drum', this.previewDrum);
@@ -209,20 +204,19 @@ jQuery(($) => {
     },
 
     loadSounds: function loadSounds() {
-      const drums =
-        ['hat', 'kick', 'snare', 'tom', 'crash', 'perc1', 'perc2', 'perc3'];
+      var drums = ['hat', 'kick', 'snare', 'tom', 'crash', 'perc1', 'perc2', 'perc3'];
 
-      Object.keys(model.kits).forEach((kit) => {
-        drums.forEach((drum, index) => {
-          const request = new XMLHttpRequest();
-          const audioUrl = `/assets/${kit}/${drum}.mp3`;
+      Object.keys(model.kits).forEach(function (kit) {
+        drums.forEach(function (drum, index) {
+          var request = new XMLHttpRequest();
+          var audioUrl = '/assets/' + kit + '/' + drum + '.mp3';
           // const audioUrl = `/drum-sequencer/assets/${kit}/${drum}.mp3`;
 
           request.open('GET', audioUrl);
           request.responseType = 'arraybuffer';
 
           request.onload = function onload() {
-            model.audio.decodeAudioData(request.response, (buffer) => {
+            model.audio.decodeAudioData(request.response, function (buffer) {
               model.kits[kit][index] = buffer;
             });
           };
@@ -232,7 +226,7 @@ jQuery(($) => {
     },
 
     getPlayPermission: function getPlayPermission() {
-      const inaudible = model.audio.createBuffer(1, 22050, 44100);
+      var inaudible = model.audio.createBuffer(1, 22050, 44100);
       model.triggerSound(inaudible);
     },
 
@@ -247,11 +241,11 @@ jQuery(($) => {
     },
 
     toggleActiveCell: function toggleCell(e) {
-      const row = $(e.target.parentElement).index();
-      const column = $(e.target).index();
-      const height = model.grid.height;
+      var row = $(e.target.parentElement).index();
+      var column = $(e.target).index();
+      var height = model.grid.height;
 
-      model.toggleActiveCell((row * height) + column);
+      model.toggleActiveCell(row * height + column);
       view.toggleActiveCell(e);
     },
 
@@ -266,16 +260,16 @@ jQuery(($) => {
 
     animateActiveCells: function animateActiveCells() {
       this.lastBeat = this.lastBeat || -1;
-      let currentBeat = this.lastBeat;
-      let currentTime = model.audio.currentTime;
+      var currentBeat = this.lastBeat;
+      var currentTime = model.audio.currentTime;
 
       while (model.notesInQueue.length && model.notesInQueue[0].time < currentTime) {
         currentBeat = model.notesInQueue[0].beat;
         model.notesInQueue.splice(0, 1);
       }
       if (this.lastBeat !== currentBeat) {
-        const row = `.sequence-row:nth-child(${currentBeat + 1})`;
-        view.animateActiveCells(`${row} > .sequence-cell`);
+        var row = '.sequence-row:nth-child(' + (currentBeat + 1) + ')';
+        view.animateActiveCells(row + ' > .sequence-cell');
         this.lastBeat = currentBeat;
       }
       requestAnimFrame(animateActiveCells.bind(this));
@@ -299,7 +293,7 @@ jQuery(($) => {
 
     respondToOrientationChange: function respondToOrientationChange() {
       view.respondToOrientationChange();
-    },
+    }
   };
 
   controller.initialize();
