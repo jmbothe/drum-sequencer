@@ -23,6 +23,8 @@
 
 [Try it out!](https://jmbothe.github.io/drum-sequencer/dist)
 
+[![example](/assets/example.gif)](https://jmbothe.github.io/drum-sequencer/dist)
+
 <a name="description"/>
 
 ## Description
